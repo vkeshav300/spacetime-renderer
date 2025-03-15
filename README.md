@@ -5,6 +5,8 @@ A physics-based rendering software built on metal. \
 > [!IMPORTANT]\
 > This project is built on Apple's Metal framework.
 > That means to run this, you must have macOS, and your `xcode-select` path must be set to your XCode app developer directory (run `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`).
+> [!WARNING]\
+> This project is still being created! Currently it offers little to no functionality. This repository has been created at this stage for the sole purpose of serving as a "code backup". Hopefully, features will be added soon.
 
 ## Tech stack
 
