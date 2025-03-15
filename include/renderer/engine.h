@@ -18,7 +18,7 @@
 
 class Engine {
 private:
-  Camera *m_camera = nullptr;
+  std::shared_ptr<Camera> m_camera = nullptr;
 
   GLFWwindow *m_window = nullptr;
   NS::Window *m_ns_window = nullptr;
@@ -47,11 +47,14 @@ private:
   static void framebuffer_size_callback(GLFWwindow *window, const int width,
                                         const int height);
   void resize_framebuffer(const int width, const int height);
-
+  
+  void create_render_pipeline(MTL::Function *vertex_function,
+                              MTL::Function *fragment_function);
+  void create_depth_and_msaa_textures();
+  void create_render_pass_descriptor();
   void update_render_pass_descriptor();
 
-  void create_depth_and_msaa_textures();
-
+  void encode_render_command(MTL::RenderCommandEncoder *render_command_encoder);
   void render_object(const auto &obj,
                      MTL::RenderCommandEncoder *render_command_encoder,
                      MTL::Buffer *vertex_buffer,
