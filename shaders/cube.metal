@@ -1,6 +1,6 @@
 #include <metal_stdlib>
 
-#include "objects/data.h"
+#include "objects/primitives/data.h"
 
 using namespace metal;
 

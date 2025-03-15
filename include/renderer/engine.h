@@ -1,16 +1,6 @@
-/**
- * @file engine.h
- * @author Keshav Verma (vkeshav300@gmail.com)
- * @brief Metal-based rendering engine.
- * @version 0.1
- * @date 2025-03-09
- *
- * @copyright Copyright (c) 2025
- *
- */
 #pragma once
 
-#include "../objects/object.h"
+#include "../objects/primitives/object.h"
 #include "camera.h"
 #include "texture.h"
 

@@ -5,6 +5,12 @@ endif()
 
 cmake_minimum_required(VERSION 3.31.6)
 
+# Define "Debug" in code if build type is debug
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-DDEBUG)
+	message(STATUS "Debug mode enabled")
+endif()
+
 project(
 	spacetime-renderer
 	LANGUAGES CXX

@@ -1,7 +1,7 @@
 #include "renderer/engine.h"
 #include "apple_math.h"
 #include "bridges/glfw.h"
-#include "objects/data.h"
+#include "objects/primitives/data.h"
 #include "renderer/texture.h"
 
 #include <simd/simd.h>
@@ -54,7 +54,7 @@ void Engine::add_object(Object *obj) {
 
   m_objects.emplace_back(obj);
   m_vertex_buffers.emplace_back(m_device->newBuffer(
-      obj->m_verticies.data(), obj->m_verticies.size() * sizeof(Vertex),
+      obj->get_vertex_c_array(), obj->get_vertex_count() * sizeof(Vertex),
       MTL::ResourceStorageModeShared));
   m_clip_matrix_buffers.emplace_back(m_device->newBuffer(
       sizeof(matrix_float4x4), MTL::ResourceStorageModeShared));
@@ -126,19 +126,21 @@ void Engine::render_object(const auto &obj,
                            MTL::Buffer *vertex_buffer,
                            MTL::Buffer *clip_matrix_buffer) {
   /* Calculate rendering matricies */
-  const vector_float3 obj_translations = obj->m_transformations.translations;
+  const Transformations obj_transformations = obj->get_transformations();
+  const vector_float3 obj_translations = obj_transformations.translations;
   const matrix_float4x4 translation_matrix =
       apple_math::make_translation_matrix4x4(
           obj_translations.x, obj_translations.y, obj_translations.z);
 
-  const vector_float3 obj_rotation_axis = obj->m_transformations.rotation_axis;
+  const vector_float3 obj_rotation_axis = obj_transformations.rotation_axis;
   const matrix_float4x4 rotation_matrix = apple_math::make_rotation_matrix4x4(
-      glfwGetTime() / 2.0f * obj->m_transformations.rotation_magnitude,
+      glfwGetTime() / 2.0f * obj_transformations.rotation_magnitude,
       vector_float3{obj_rotation_axis.x, obj_rotation_axis.y,
                     obj_rotation_axis.z});
 
   const matrix_float4x4 model_matrix =
       matrix_multiply(translation_matrix, rotation_matrix);
+
   const matrix_float4x4 camera_matrix =
       m_camera->get_camera_matrix4x4(m_aspect_ratio);
 
@@ -152,12 +154,14 @@ void Engine::render_object(const auto &obj,
   render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
   render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
 
-  if (obj->m_texture != nullptr)
+  Texture *texture = obj->get_texture();
+  if (texture)
     render_command_encoder->setFragmentTexture(
-        obj->m_texture->get_mtl_texture(), 0);
+        texture->get_mtl_texture(), 0);
 
-  render_command_encoder->drawPrimitives(obj->m_prim_type, obj->m_start_vertex,
-                                         obj->m_verticies.size());
+  render_command_encoder->drawPrimitives(obj->get_primitive_type(),
+                                         obj->get_vertex_start(),
+                                         obj->get_vertex_count());
 }
 
 void Engine::render() {
@@ -254,4 +258,4 @@ void Engine::create_depth_and_msaa_textures() {
       m_device, MTL::TextureType2DMultisample, MTL::PixelFormatDepth32Float,
       m_layer->drawableSize().width, m_layer->drawableSize().height,
       m_sample_count, MTL::TextureUsageRenderTarget);
-} 
+}

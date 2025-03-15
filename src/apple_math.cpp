@@ -54,7 +54,7 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
 
   return make_matrix4x4(xs, 0, 0, 0, 0, ys, 0, 0, 0, 0,
                         far_z / (far_z - near_z),
-                        -(near_z * far_z) / (far_z - near_z), 0, 0, 1, 0);
+                        -(near_z * far_z) / (far_z - near_z), 0, 0, -1, 0);
 }
 
 } // namespace apple_math
