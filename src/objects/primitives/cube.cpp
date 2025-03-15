@@ -55,4 +55,4 @@ Cube::Cube(const vector_float3 &translations, const float rotation_magnitude,
   m_transformations.rotation_magnitude = rotation_magnitude;
   m_transformations.rotation_axis = rotation_axis;
 }
-Cube::~Cube() {}
+Cube::~Cube() { delete m_texture; }

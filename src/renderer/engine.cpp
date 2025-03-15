@@ -36,11 +36,20 @@ Engine::Engine(const int width, const int height, Camera *camera,
 }
 
 Engine::~Engine() {
-  /* Pointer cleanup */
+  /* Metal cleanup */
   m_layer->release();
   m_ns_window->release();
   m_default_library->release();
   m_command_queue->release();
+  m_render_pass_descriptor->release();
+  m_render_pso->release();
+  m_depth_stencil_state->release();
+
+  for (auto &vertex_buffer : m_vertex_buffers)
+    vertex_buffer->release();
+
+  for (auto &clip_matrix_buffer : m_clip_matrix_buffers)
+    clip_matrix_buffer->release();
 
   /* GLFW cleanup */
   glfwDestroyWindow(m_window);
@@ -60,25 +69,8 @@ void Engine::add_object(Object *obj) {
       sizeof(matrix_float4x4), MTL::ResourceStorageModeShared));
 }
 
-void Engine::stage() {
-  /* Load shaders */
-  m_default_library = m_device->newDefaultLibrary();
-  if (!m_default_library)
-    throw std::runtime_error("Failed to load default library");
-
-  m_command_queue = m_device->newCommandQueue()->retain();
-
-  MTL::Function *vertex_function = m_default_library->newFunction(
-      NS::String::string("vertex_shader", NS::ASCIIStringEncoding));
-  if (!vertex_function)
-    throw std::runtime_error("Failed to load vertex function");
-
-  MTL::Function *fragment_function = m_default_library->newFunction(
-      NS::String::string("fragment_shader", NS::ASCIIStringEncoding));
-  if (!fragment_function)
-    throw std::runtime_error("Failed to load fragment function");
-
-  /* Render pipeline */
+void Engine::create_render_pipeline(MTL::Function *vertex_function,
+                                    MTL::Function *fragment_function) {
   MTL::RenderPipelineDescriptor *pipeline_descriptor =
       MTL::RenderPipelineDescriptor::alloc()->init();
   pipeline_descriptor->setLabel(
@@ -117,8 +109,71 @@ void Engine::stage() {
   depth_stencil_descriptor->setDepthWriteEnabled(true);
   m_depth_stencil_state =
       m_device->newDepthStencilState(depth_stencil_descriptor);
+}
 
-  depth_stencil_descriptor->release();
+void Engine::create_render_pass_descriptor() {
+  m_render_pass_descriptor = MTL::RenderPassDescriptor::alloc()->init();
+
+  MTL::RenderPassColorAttachmentDescriptor *color_attachment =
+      m_render_pass_descriptor->colorAttachments()->object(0);
+  MTL::RenderPassDepthAttachmentDescriptor *depth_attachment =
+      m_render_pass_descriptor->depthAttachment();
+
+  color_attachment->setTexture(MSAA_texture->get_mtl_texture());
+  color_attachment->setResolveTexture(m_drawable->texture());
+  color_attachment->setLoadAction(MTL::LoadActionClear);
+  color_attachment->setClearColor(MTL::ClearColor(41.0f/255.0f, 42.0f/255.0f, 48.0f/255.0f, 1.0));
+  color_attachment->setStoreAction(MTL::StoreActionMultisampleResolve);
+
+  depth_attachment->setTexture(depth_texture->get_mtl_texture());
+  depth_attachment->setLoadAction(MTL::LoadActionClear);
+  depth_attachment->setClearDepth(1.0);
+  depth_attachment->setStoreAction(MTL::StoreActionStore);
+}
+
+void Engine::update_render_pass_descriptor() {
+  m_render_pass_descriptor->colorAttachments()->object(0)->setTexture(
+      MSAA_texture->get_mtl_texture());
+  m_render_pass_descriptor->colorAttachments()->object(0)->setResolveTexture(
+      m_drawable->texture());
+  m_render_pass_descriptor->depthAttachment()->setTexture(
+      depth_texture->get_mtl_texture());
+}
+
+void Engine::stage() {
+  /* Load shaders */
+  m_default_library = m_device->newDefaultLibrary();
+  if (!m_default_library)
+    throw std::runtime_error("Failed to load default library");
+
+  m_command_queue = m_device->newCommandQueue()->retain();
+
+  MTL::Function *vertex_function = m_default_library->newFunction(
+      NS::String::string("vertex_shader", NS::ASCIIStringEncoding));
+  if (!vertex_function)
+    throw std::runtime_error("Failed to load vertex function");
+
+  MTL::Function *fragment_function = m_default_library->newFunction(
+      NS::String::string("fragment_shader", NS::ASCIIStringEncoding));
+  if (!fragment_function)
+    throw std::runtime_error("Failed to load fragment function");
+
+  create_render_pipeline(vertex_function, fragment_function);
+  create_depth_and_msaa_textures();
+  create_render_pass_descriptor();
+}
+
+void Engine::encode_render_command(MTL::RenderCommandEncoder *render_command_encoder) {
+  render_command_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
+    render_command_encoder->setCullMode(MTL::CullModeBack);
+    render_command_encoder->setTriangleFillMode(m_triangle_fill_mode);
+    render_command_encoder->setRenderPipelineState(m_render_pso);
+    render_command_encoder->setDepthStencilState(m_depth_stencil_state);
+
+    /* Render objects */
+    for (size_t i = 0; i < m_objects.size(); i++)
+      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i],
+                    m_clip_matrix_buffers[i]);
 }
 
 void Engine::render_object(const auto &obj,
@@ -156,8 +211,7 @@ void Engine::render_object(const auto &obj,
 
   Texture *texture = obj->get_texture();
   if (texture)
-    render_command_encoder->setFragmentTexture(
-        texture->get_mtl_texture(), 0);
+    render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 
   render_command_encoder->drawPrimitives(obj->get_primitive_type(),
                                          obj->get_vertex_start(),
@@ -181,35 +235,26 @@ void Engine::render() {
         m_command_queue
             ->commandBuffer(); // Create command buffer to hold commands for GPU
 
-    m_render_pass_descriptor = MTL::RenderPassDescriptor::alloc()->init();
-
-    if (!MSAA_texture | !depth_texture)
-      create_depth_and_msaa_textures();
+    // if (!MSAA_texture | !depth_texture)
+    //   create_depth_and_msaa_textures();
 
     update_render_pass_descriptor();
 
     /* Encodes render commands */
     MTL::RenderCommandEncoder *render_command_encoder =
         m_command_buffer->renderCommandEncoder(m_render_pass_descriptor);
-    render_command_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
-    render_command_encoder->setCullMode(MTL::CullModeBack);
-    render_command_encoder->setTriangleFillMode(m_triangle_fill_mode);
-    render_command_encoder->setRenderPipelineState(m_render_pso);
-    render_command_encoder->setDepthStencilState(m_depth_stencil_state);
-
-    /* Render objects */
-    for (size_t i = 0; i < m_objects.size(); i++)
-      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i],
-                    m_clip_matrix_buffers[i]);
-
-    render_command_encoder->endEncoding();
+    
+    encode_render_command(render_command_encoder);
 
     /* Send rendered frame to GPU */
     m_command_buffer->presentDrawable(m_drawable);
+    
+    render_command_encoder->endEncoding();
     m_command_buffer->commit();
 
-    // Disabled due to being a performance-killer (makes CPU wait for GPU
-    // completion) m_command_buffer->waitUntilCompleted();
+#ifdef DEBUG
+    m_command_buffer->waitUntilCompleted();
+#endif
 
     pool->release(); // Cleanup memory
 
@@ -234,15 +279,6 @@ void Engine::resize_framebuffer(const int width, const int height) {
   create_depth_and_msaa_textures();
   m_drawable = m_layer->nextDrawable();
   update_render_pass_descriptor();
-}
-
-void Engine::update_render_pass_descriptor() {
-  m_render_pass_descriptor->colorAttachments()->object(0)->setTexture(
-      MSAA_texture->get_mtl_texture());
-  m_render_pass_descriptor->colorAttachments()->object(0)->setResolveTexture(
-      m_drawable->texture());
-  m_render_pass_descriptor->depthAttachment()->setTexture(
-      depth_texture->get_mtl_texture());
 }
 
 void Engine::create_depth_and_msaa_textures() {
