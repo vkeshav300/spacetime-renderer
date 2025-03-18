@@ -86,11 +86,13 @@ foreach(SHADER ${METAL_SHADERS})
 endforeach()
 
 # Link compiled shaders into a Metal library
-add_custom_command(
-    OUTPUT "${METALLIB_OUTPUT}"
-    COMMAND xcrun -sdk macosx metallib "${COMPILED_SHADERS}" -o "${METALLIB_OUTPUT}"
-    DEPENDS ${COMPILED_SHADERS}
-    COMMENT "Linking Metal shaders into default.metallib"
-)
+if (${COMPILED_SHADERS})
+	add_custom_command(
+    	OUTPUT "${METALLIB_OUTPUT}"
+	    COMMAND xcrun -sdk macosx metallib "${COMPILED_SHADERS}" -o "${METALLIB_OUTPUT}"
+    	DEPENDS ${COMPILED_SHADERS}
+    	COMMENT "Linking Metal shaders into default.metallib"
+	)
 
-add_custom_target(metal_shaders ALL DEPENDS "${METALLIB_OUTPUT}")
+	add_custom_target(metal_shaders ALL DEPENDS "${METALLIB_OUTPUT}")
+endif()
