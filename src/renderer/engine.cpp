@@ -26,6 +26,9 @@ Engine::~Engine() {
     glfwTerminate();
 
     m_device->release();
+
+    for (auto &buffer : m_vertex_buffers)
+        buffer->release();
 }
 
 void Engine::add_object(Object *obj) {
