@@ -1,0 +1,138 @@
+#include "renderer/engine.hpp"
+#include "bridges/glfw.hpp"
+
+#include <stdexcept>
+
+Engine::Engine(const int width, const int height) : m_device(MTL::CreateSystemDefaultDevice()), m_layer(CA::MetalLayer::layer()) {
+    /* Window */
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]", nullptr, nullptr);
+
+    if (!m_window) {
+        glfwTerminate();
+        m_device->release();
+
+        throw std::runtime_error("Failed to create window");
+    }
+
+    m_layer->setDevice(m_device);
+    m_layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+
+    m_ns_window = get_ns_window(m_window, m_layer);
+}
+
+Engine::~Engine() {
+    glfwTerminate();
+
+    m_device->release();
+
+    for (auto &buffer : m_vertex_buffers)
+        buffer->release();
+}
+
+void Engine::add_object(Object *obj) {
+    const size_t obj_index = m_objects.size();
+    m_vertex_buffers.push_back(nullptr);
+    m_vertex_buffers[obj_index] = m_device->newBuffer(obj->get_vertex_carray(), obj->get_vertex_count() * sizeof(Vertex), MTL::ResourceStorageModeShared);
+    m_objects.push_back(std::shared_ptr<Object>(obj));
+}
+
+void Engine::create_render_pipeline() {
+    /* Create render pipeline descriptor */
+    MTL::RenderPipelineDescriptor *render_pipeline_descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
+    render_pipeline_descriptor->setLabel(NS::String::string("Spacetime Renderer Rendering Pipeline", NS::ASCIIStringEncoding));
+    render_pipeline_descriptor->colorAttachments()->object(0)->setPixelFormat(m_layer->pixelFormat());
+    
+    /* Set vertex shader */
+    MTL::Function *vertex_shader = m_default_library->newFunction(NS::String::string("vertex_shader", NS::ASCIIStringEncoding));
+    if (!vertex_shader)
+        throw std::runtime_error("Failed to load vertex shader");
+
+    render_pipeline_descriptor->setVertexFunction(vertex_shader);
+    vertex_shader->release();
+    
+    /* Set fragment shader */
+    MTL::Function *fragment_shader = m_default_library->newFunction(NS::String::string("fragment_shader", NS::ASCIIStringEncoding));
+    if (!fragment_shader)
+        throw std::runtime_error("Failed to load fragment shader");
+
+    render_pipeline_descriptor->setFragmentFunction(fragment_shader);
+    fragment_shader->release();
+
+    /* Create render pipeline state from descriptor */
+    NS::Error *render_pso_error = nullptr;
+    m_render_pso = m_device->newRenderPipelineState(render_pipeline_descriptor, &render_pso_error);
+    if (render_pso_error)
+        throw std::runtime_error("Failed to create render pipeline state");
+    
+    render_pipeline_descriptor->release();
+}
+
+void Engine::stage() {
+    /* Loads library containing all GPU-running functions (from .metal files) */
+    m_default_library = m_device->newDefaultLibrary();
+    if (!m_default_library)
+        throw std::runtime_error("Failed to load default library");
+
+    /* Creates queue for holding GPU commands */
+    m_command_queue = m_device->newCommandQueue();
+
+    create_render_pipeline();
+
+}
+
+void Engine::render_object(const std::shared_ptr<Object> &obj, MTL::RenderCommandEncoder *render_command_encoder, const MTL::Buffer *vertex_buffer) {
+    render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
+    render_command_encoder->drawPrimitives(
+        MTL::PrimitiveTypeTriangle,
+        static_cast<NS::UInteger>(0),
+        obj->get_vertex_count()
+    );
+}
+
+void Engine::render() {
+    while (!glfwWindowShouldClose(m_window)) {
+        NS::AutoreleasePool *pool = NS::AutoreleasePool::alloc()->init(); // Semi-automatic memory management
+
+        /* Get next drawable frame */
+        m_drawable = m_layer->nextDrawable();
+        if (!m_drawable) {
+            pool->release();
+            continue;
+        }
+        
+        m_command_buffer = m_command_queue->commandBuffer();
+
+        /* Create render command */
+        MTL::RenderPassDescriptor *render_pass_descriptor = MTL::RenderPassDescriptor::alloc()->init();
+        MTL::RenderPassColorAttachmentDescriptor *color_descriptor = render_pass_descriptor->colorAttachments()->object(0);
+        color_descriptor->setTexture(m_drawable->texture());
+        color_descriptor->setLoadAction(MTL::LoadActionClear);
+        color_descriptor->setClearColor(MTL::ClearColor(41.0f/255.0f, 42.0f/255.0f, 48.0f/255.0f, 1.0));
+        color_descriptor->setStoreAction(MTL::StoreActionStore);
+
+        MTL::RenderCommandEncoder *render_command_encoder = m_command_buffer->renderCommandEncoder(render_pass_descriptor);
+        render_command_encoder->setRenderPipelineState(m_render_pso);
+
+        render_pass_descriptor->release();
+
+        /* Render objects */
+        for (size_t i = 0; i < m_objects.size(); i++)
+            render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i]);
+            
+
+        /* Tell GPU frame is renderable */
+        m_command_buffer->presentDrawable(m_drawable);
+        render_command_encoder->endEncoding();
+        m_command_buffer->commit();
+
+#ifdef DEBUG
+        m_command_buffer->waitUntilCompleted(); // Forces CPU to wait for GPU completion
+#endif
+
+        pool->release();
+        
+        glfwPollEvents();
+    }
+}
