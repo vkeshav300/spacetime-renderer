@@ -107,6 +107,10 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
   render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
                                          static_cast<NS::UInteger>(0),
                                          obj->get_vertex_count());
+
+    Texture *texture = obj->get_texture();
+    if (texture)
+        render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 }
 
 void Engine::render() {

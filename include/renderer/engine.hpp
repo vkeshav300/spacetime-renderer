@@ -2,6 +2,7 @@
 
 #include "../objects/primitives/object.hpp"
 #include "gpu_buffers.h"
+#include "texture.hpp"
 
 #include <Metal/Metal.hpp>
 #include <Foundation/Foundation.hpp>
