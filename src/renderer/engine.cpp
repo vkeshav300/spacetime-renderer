@@ -4,9 +4,6 @@
 #include <stdexcept>
 
 Engine::Engine(const int width, const int height) : m_device(MTL::CreateSystemDefaultDevice()), m_layer(CA::MetalLayer::layer()) {
-    m_layer->setDevice(m_device);
-    m_layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
-    
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]", nullptr, nullptr);
@@ -20,6 +17,14 @@ Engine::Engine(const int width, const int height) : m_device(MTL::CreateSystemDe
 
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+
+    int fb_width, fb_height;
+    glfwGetFramebufferSize(m_window, &fb_width, &fb_height);
+    m_aspect_ratio = static_cast<float>(fb_width) / fb_height;
+
+    m_layer->setDevice(m_device);
+    m_layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+    m_layer->setDrawableSize(CGSizeMake(fb_width, fb_height)); // Fixes "fuzzy" borders of shapes
 
     m_ns_window = get_ns_window(m_window, m_layer);
 }
@@ -145,4 +150,5 @@ void Engine::framebuffer_size_callback(GLFWwindow *window, const int width, cons
 
 void Engine::resize_framebuffer(const int width, const int height) {
     m_layer->setDrawableSize(CGSizeMake(width, height));
+    m_aspect_ratio = static_cast<float>(width) / height;
 }

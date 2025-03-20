@@ -17,6 +17,7 @@ class Engine {
 private:
     GLFWwindow *m_window;
     NS::Window *m_ns_window;
+    float m_aspect_ratio;
 
     MTL::Device *m_device;
     MTL::Library *m_default_library;
