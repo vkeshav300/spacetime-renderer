@@ -42,6 +42,10 @@ Engine::~Engine() {
     buffer->release();
 }
 
+MTL::Device *Engine::get_device() {
+  return m_device;
+}
+
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
   m_vertex_buffers.push_back(nullptr);

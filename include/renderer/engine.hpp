@@ -44,6 +44,8 @@ public:
     Engine(const int width, const int height);
     ~Engine();
 
+    MTL::Device *get_device();
+
     void add_object(Object *obj);
 
     void stage();
