@@ -7,9 +7,11 @@
 
 class Triangle: public Object_I<Triangle> {
 private:
-	std::array<Vertex, 3> m_verticies;	
+	std::array<Vertex, 3> m_verticies;
+	
+	Texture *m_texture;
 
-	friend Object_I<Triangle>;
+	friend class Object_I<Triangle>;
 
 public:
 	Triangle();

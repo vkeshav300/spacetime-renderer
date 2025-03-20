@@ -4,5 +4,8 @@
 #define MTK_PRIVATE_IMPLEMENTATION
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
-#include <QuartzCore/QuartzCore.hpp>
 #include <MetalKit/MetalKit.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>

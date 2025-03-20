@@ -2,6 +2,7 @@
 
 #include "../objects/primitives/object.hpp"
 #include "gpu_buffers.h"
+#include "texture.hpp"
 
 #include <Metal/Metal.hpp>
 #include <Foundation/Foundation.hpp>
@@ -17,6 +18,7 @@ class Engine {
 private:
     GLFWwindow *m_window;
     NS::Window *m_ns_window;
+    float m_aspect_ratio;
 
     MTL::Device *m_device;
     MTL::Library *m_default_library;
@@ -34,6 +36,9 @@ private:
     void create_render_pipeline();
 
     void render_object(const std::shared_ptr<Object> &obj, MTL::RenderCommandEncoder *render_command_encoder, const MTL::Buffer *vertex_buffer);
+
+    static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);
+    void resize_framebuffer(const int width, const int height);
 
 public:
     Engine(const int width, const int height);
