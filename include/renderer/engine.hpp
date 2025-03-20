@@ -35,6 +35,9 @@ private:
 
     void render_object(const std::shared_ptr<Object> &obj, MTL::RenderCommandEncoder *render_command_encoder, const MTL::Buffer *vertex_buffer);
 
+    static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);
+    void resize_framebuffer(const int width, const int height);
+
 public:
     Engine(const int width, const int height);
     ~Engine();

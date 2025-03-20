@@ -4,7 +4,9 @@
 #include <stdexcept>
 
 Engine::Engine(const int width, const int height) : m_device(MTL::CreateSystemDefaultDevice()), m_layer(CA::MetalLayer::layer()) {
-    /* Window */
+    m_layer->setDevice(m_device);
+    m_layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+    
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]", nullptr, nullptr);
@@ -16,8 +18,8 @@ Engine::Engine(const int width, const int height) : m_device(MTL::CreateSystemDe
         throw std::runtime_error("Failed to create window");
     }
 
-    m_layer->setDevice(m_device);
-    m_layer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
     m_ns_window = get_ns_window(m_window, m_layer);
 }
@@ -135,4 +137,12 @@ void Engine::render() {
         
         glfwPollEvents();
     }
+}
+
+void Engine::framebuffer_size_callback(GLFWwindow *window, const int width, const int height) {
+    reinterpret_cast<Engine *>(glfwGetWindowUserPointer(window))->resize_framebuffer(width, height);
+}
+
+void Engine::resize_framebuffer(const int width, const int height) {
+    m_layer->setDrawableSize(CGSizeMake(width, height));
 }
