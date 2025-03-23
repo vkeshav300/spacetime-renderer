@@ -4,4 +4,6 @@
 
 Triangle::Triangle() {}
 
-Triangle::~Triangle() {}
+Triangle::~Triangle() {
+    delete m_texture;
+}
