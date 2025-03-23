@@ -7,6 +7,8 @@
 #include <Metal/Metal.hpp>
 #include <simd/simd.h>
 
+#include <memory>
+
 template <typename Derived> class Object_I : public Object {
 protected:
   Derived *m_derived = static_cast<Derived *>(this);
@@ -20,11 +22,11 @@ public:
     return static_cast<NS::UInteger>(m_derived->m_vertices.size());
   }
 
-  void set_texture(Texture *texture) override {
+  void set_texture(std::shared_ptr<Texture> texture) override {
     m_derived->m_texture = texture;
   }
 
-  Texture *get_texture() const override { return m_derived->m_texture; }
+  std::shared_ptr<Texture> get_texture() const override { return m_derived->m_texture; }
 
   vector_float3 get_translations() const override {
     return m_derived->m_translations;

@@ -4,6 +4,7 @@
 #include "object_i.hpp"
 
 #include <array>
+#include <memory>
 
 class Square : public Object_I<Square> {
 protected:
@@ -16,11 +17,10 @@ protected:
       {{0.5f, -0.5f, 0.5f, 1.0f}, {1.0f, 0.0f}}   // Bottom-right
   }};
 
-  Texture *m_texture;
+  std::shared_ptr<Texture> m_texture;
 
   friend class Object_I<Square>;
 
 public:
   Square();
-  ~Square();
 };
