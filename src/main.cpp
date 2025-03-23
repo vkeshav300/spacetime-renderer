@@ -6,8 +6,13 @@
 #include "renderer/engine.hpp"
 #include "renderer/texture.hpp"
 
+#include <cmath>
+
 int main() {
-  Engine engine(800, 600);
+  Camera *camera =
+      new Camera(vector_float3{0.0f, -5.0f, 0.0f},
+                 vector_float3{0.0f, 0.0f, 0.0f}, M_PI / 2, 1.0f, 100.0f);
+  Engine engine(camera, 800, 600);
 
 #ifdef DEBUG
   Texture *texture =

@@ -3,9 +3,9 @@
 
 #include <stdexcept>
 
-Engine::Engine(const int width, const int height)
+Engine::Engine(Camera *camera, const int width, const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
-      m_layer(CA::MetalLayer::layer()) {
+      m_layer(CA::MetalLayer::layer()), m_camera(camera) {
   glfwInit();
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]",
@@ -43,6 +43,8 @@ Engine::~Engine() {
   m_command_queue->release();
   m_default_library->release();
   m_device->release();
+
+  delete m_camera;
 }
 
 MTL::Device *Engine::get_device() { return m_device; }

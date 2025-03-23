@@ -4,6 +4,7 @@
 #include "../../renderer/texture.hpp"
 
 #include <Metal/Metal.hpp>
+#include <simd/simd.h>
 
 class Object {
 protected:
@@ -15,4 +16,10 @@ public:
 
   virtual void set_texture(Texture *texture) = 0;
   virtual Texture *get_texture() const = 0;
+
+  virtual vector_float3 get_translations() const = 0;
+  virtual void translate(const float x, const float y, const float z) = 0;
+  virtual vector_float4 get_rotations() const = 0;
+  virtual void rotate(const float x, const float y, const float z,
+                      const float magnitude) = 0;
 };

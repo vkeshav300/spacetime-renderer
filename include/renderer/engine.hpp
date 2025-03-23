@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../objects/primitives/object.hpp"
+#include "camera.hpp"
 #include "gpu_buffers.h"
 #include "texture.hpp"
 
@@ -17,6 +18,8 @@
 
 class Engine {
 private:
+  Camera *m_camera;
+
   GLFWwindow *m_window;
   NS::Window *m_ns_window;
   float m_aspect_ratio;
@@ -46,7 +49,7 @@ private:
   void resize_framebuffer(const int width, const int height);
 
 public:
-  Engine(const int width, const int height);
+  Engine(Camera *camera, const int width, const int height);
   ~Engine();
 
   MTL::Device *get_device();

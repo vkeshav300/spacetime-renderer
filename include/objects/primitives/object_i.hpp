@@ -5,6 +5,7 @@
 #include "object.hpp"
 
 #include <Metal/Metal.hpp>
+#include <simd/simd.h>
 
 template <typename Derived> class Object_I : public Object {
 protected:
@@ -24,4 +25,21 @@ public:
   }
 
   Texture *get_texture() const override { return m_derived->m_texture; }
+
+  vector_float3 get_translations() const override {
+    return m_derived->m_translations;
+  }
+
+  void translate(const float x, const float y, const float z) override {
+    m_derived->m_translations = vector_float3{x, y, z};
+  }
+
+  vector_float4 get_rotations() const override {
+    return m_derived->m_rotations;
+  }
+
+  void rotate(const float x, const float y, const float z,
+              const float magnitude) override {
+    m_derived->m_rotations = vector_float4{x, y, z, magnitude};
+  }
 };

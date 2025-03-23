@@ -11,6 +11,9 @@ private:
 
   Texture *m_texture;
 
+  vector_float3 m_translations;
+  vector_float4 m_rotations;
+
   friend class Object_I<Square>;
 
 public:
