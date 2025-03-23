@@ -117,15 +117,13 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
                            MTL::Buffer *clip_matrix_buffer,
                            const matrix_float4x4 &camera_matrix) {
   /* Calculate clip matrix from transformations */
-  const matrix_float4x4 model_matrix = matrix_multiply(
-                            apple_math::make_translation_matrix4x4(
-                                obj->get_translations()),
-                            apple_math::make_rotation_matrix4x4(
-                                obj->get_rotations())),
-                        clip_matrix =
-                            matrix_multiply(camera_matrix, model_matrix);
+  const matrix_float4x4 clip_matrix = matrix_multiply(
+      matrix_multiply(camera_matrix, apple_math::make_translation_matrix4x4(
+                                         obj->get_translations())),
+      apple_math::make_rotation_matrix4x4(obj->get_rotations()));
 
-  std::memcpy(clip_matrix_buffer->contents(), &clip_matrix,
+  const Transformations transformations = {clip_matrix};
+  std::memcpy(clip_matrix_buffer->contents(), &transformations,
               sizeof(matrix_float4x4));
 
   /* Set buffers for vertex shader */
