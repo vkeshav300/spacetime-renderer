@@ -18,7 +18,7 @@
 
 class Engine {
 private:
-  Camera *m_camera;
+std::shared_ptr<Camera> m_camera;
 
   GLFWwindow *m_window;
   NS::Window *m_ns_window;
@@ -51,7 +51,7 @@ private:
   void resize_framebuffer(const int width, const int height);
 
 public:
-  Engine(Camera *camera, const int width, const int height);
+  Engine(std::shared_ptr<Camera> camera, const int width, const int height);
   ~Engine();
 
   MTL::Device *get_device();

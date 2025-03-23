@@ -4,7 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 
-Engine::Engine(Camera *camera, const int width, const int height)
+Engine::Engine(std::shared_ptr<Camera> camera, const int width, const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
       m_layer(CA::MetalLayer::layer()), m_camera(camera) {
   glfwInit();
@@ -47,8 +47,6 @@ Engine::~Engine() {
   m_command_queue->release();
   m_default_library->release();
   m_device->release();
-
-  delete m_camera;
 }
 
 MTL::Device *Engine::get_device() { return m_device; }
@@ -133,7 +131,7 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
   render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
   render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
 
-  Texture *texture = obj->get_texture();
+  std::shared_ptr<Texture> texture = obj->get_texture();
   if (texture)
     render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 
