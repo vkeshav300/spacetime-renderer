@@ -49,10 +49,11 @@ MTL::Device *Engine::get_device() { return m_device; }
 
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
-  m_vertex_buffers.push_back(nullptr);
-  m_vertex_buffers[obj_index] = m_device->newBuffer(
+  m_vertex_buffers.push_back(m_device->newBuffer(
       obj->get_vertex_carray(), obj->get_vertex_count() * sizeof(Vertex),
-      MTL::ResourceStorageModeShared);
+      MTL::ResourceStorageModeShared));
+  m_clip_matrix_buffers.push_back(m_device->newBuffer(
+      sizeof(matrix_float4x4), MTL::ResourceStorageModeShared));
   m_objects.push_back(std::shared_ptr<Object>(obj));
 }
 
