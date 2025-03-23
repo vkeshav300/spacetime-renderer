@@ -13,11 +13,11 @@ protected:
 
 public:
   Vertex *get_vertex_carray() const override {
-    return m_derived->m_verticies.data();
+    return m_derived->m_vertices.data();
   }
 
   NS::UInteger get_vertex_count() const override {
-    return static_cast<NS::UInteger>(m_derived->m_verticies.size());
+    return static_cast<NS::UInteger>(m_derived->m_vertices.size());
   }
 
   void set_texture(Texture *texture) override {

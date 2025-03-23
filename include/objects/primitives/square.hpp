@@ -7,7 +7,7 @@
 
 class Square : public Object_I<Square> {
 private:
-  std::array<Vertex, 6> m_verticies = {{
+  std::array<Vertex, 6> m_vertices = {{
       {{-0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 0.0f}}, // Bottom-left
       {{-0.5f, 0.5f, 0.5f, 1.0f}, {0.0f, 1.0f}},  // Top-left
       {{0.5f, 0.5f, 0.5f, 1.0f}, {1.0f, 1.0f}},   // Top-right
