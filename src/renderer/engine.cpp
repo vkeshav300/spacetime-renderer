@@ -4,7 +4,8 @@
 #include <cstring>
 #include <stdexcept>
 
-Engine::Engine(std::shared_ptr<Camera> camera, const int width, const int height)
+Engine::Engine(std::shared_ptr<Camera> camera, const int width,
+               const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
       m_layer(CA::MetalLayer::layer()), m_camera(camera) {
   glfwInit();

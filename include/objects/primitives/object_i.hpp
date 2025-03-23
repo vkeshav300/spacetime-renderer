@@ -26,7 +26,9 @@ public:
     m_derived->m_texture = texture;
   }
 
-  std::shared_ptr<Texture> get_texture() const override { return m_derived->m_texture; }
+  std::shared_ptr<Texture> get_texture() const override {
+    return m_derived->m_texture;
+  }
 
   vector_float3 get_translations() const override {
     return m_derived->m_translations;

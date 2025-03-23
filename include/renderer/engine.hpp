@@ -18,7 +18,7 @@
 
 class Engine {
 private:
-std::shared_ptr<Camera> m_camera;
+  std::shared_ptr<Camera> m_camera;
 
   GLFWwindow *m_window;
   NS::Window *m_ns_window;

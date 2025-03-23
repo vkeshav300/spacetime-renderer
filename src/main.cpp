@@ -10,14 +10,17 @@
 #include <memory>
 
 int main() {
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(vector_float3{0.0f, 0.0f, -5.0f},
-    vector_float3{0.0f, 0.0f, 0.0f}, M_PI / 2, 1.0f, 100.0f);
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(
+      vector_float3{0.0f, 0.0f, -5.0f}, vector_float3{0.0f, 0.0f, 0.0f},
+      M_PI / 2, 1.0f, 100.0f);
   Engine engine(camera, 800, 600);
 
 #ifdef DEBUG
-  std::shared_ptr<Texture> texture = std::make_shared<Texture>(engine.get_device(), "assets/textures/test.jpg");
+  std::shared_ptr<Texture> texture = std::make_shared<Texture>(
+      engine.get_device(), "assets/textures/test.jpg");
 #else
-  std::shared_ptr<Texture> texture = std::make_shared<Texture>(engine.get_device(), "../assets/textures/test.jpg");
+  std::shared_ptr<Texture> texture = std::make_shared<Texture>(
+      engine.get_device(), "../assets/textures/test.jpg");
 #endif
 
   Square *shape = new Square();
