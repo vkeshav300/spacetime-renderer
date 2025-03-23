@@ -8,6 +8,9 @@
 
 class Object {
 protected:
+  vector_float3 m_translations = {0.0f, 0.0f, 0.0f};
+  vector_float4 m_rotations = {0.0f, 0.0f, 0.0f, 0.0f};
+
 public:
   virtual ~Object() = default;
 
