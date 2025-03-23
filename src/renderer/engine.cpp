@@ -1,6 +1,7 @@
 #include "renderer/engine.hpp"
 #include "bridges/glfw.hpp"
 
+#include <cstring>
 #include <stdexcept>
 
 Engine::Engine(Camera *camera, const int width, const int height)
@@ -37,6 +38,9 @@ Engine::~Engine() {
   glfwTerminate();
 
   for (auto &buffer : m_vertex_buffers)
+    buffer->release();
+
+  for (auto &buffer : m_clip_matrix_buffers)
     buffer->release();
 
   m_render_pso->release();
@@ -110,8 +114,24 @@ void Engine::stage() {
 
 void Engine::render_object(const std::shared_ptr<Object> &obj,
                            MTL::RenderCommandEncoder *render_command_encoder,
-                           const MTL::Buffer *vertex_buffer) {
+                           const MTL::Buffer *vertex_buffer,
+                           MTL::Buffer *clip_matrix_buffer,
+                           const matrix_float4x4 &camera_matrix) {
+  /* Calculate clip matrix from transformations */
+  const matrix_float4x4 model_matrix = matrix_multiply(
+                            apple_math::make_translation_matrix4x4(
+                                obj->get_translations()),
+                            apple_math::make_rotation_matrix4x4(
+                                obj->get_rotations())),
+                        clip_matrix =
+                            matrix_multiply(camera_matrix, model_matrix);
+
+  std::memcpy(clip_matrix_buffer->contents(), &clip_matrix,
+              sizeof(matrix_float4x4));
+
+  /* Set buffers for vertex shader */
   render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
+  render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
 
   Texture *texture = obj->get_texture();
   if (texture)
@@ -155,8 +175,12 @@ void Engine::render() {
     render_pass_descriptor->release();
 
     /* Render objects */
+    const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
+        m_aspect_ratio); // Camera matrix is defined here to only calculate 1
+                         // camera matrix per render pass
     for (size_t i = 0; i < m_objects.size(); i++)
-      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i]);
+      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i],
+                    m_clip_matrix_buffers[i], camera_matrix);
 
     /* Tell GPU frame is renderable */
     m_command_buffer->presentDrawable(m_drawable);

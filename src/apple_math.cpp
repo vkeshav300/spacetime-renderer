@@ -20,7 +20,13 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_translation_matrix4x4(const float x,
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD
-make_rotation_matrix4x4(const float theta, vector_float3 axis) {
+make_translation_matrix4x4(const vector_float3 &translations) {
+  return make_translation_matrix4x4(translations.x, translations.y,
+                                    translations.z);
+}
+
+matrix_float4x4 APPLE_SIMD_OVERLOAD
+make_rotation_matrix4x4(const radians theta, vector_float3 axis) {
   if ((simd_length(axis) == 0) | (theta == 0))
     return make_matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -33,6 +39,12 @@ make_rotation_matrix4x4(const float theta, vector_float3 axis) {
       ct + x * x * ci, x * y * ci - z * st, x * z * ci + z * st, 0,
       x * y * ci + z * st, ct + y * y * ci, y * z * ci - x * st, 0,
       x * z * ci - y * st, y * z * ci + x * st, ct + z * z * ci, 0, 0, 0, 0, 1);
+}
+
+matrix_float4x4 APPLE_SIMD_OVERLOAD
+make_rotation_matrix4x4(const vector_float4 &rotations) {
+  return make_rotation_matrix4x4(
+      rotations.w, vector_float3{rotations.x, rotations.y, rotations.z});
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_look_at_matrix4x4(

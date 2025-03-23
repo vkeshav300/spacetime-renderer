@@ -9,9 +9,10 @@ struct Vertex_Out {
     vector_float2 texture_coordinate;
 };
 
-vertex Vertex_Out vertex_shader(const uint vertex_ID [[ vertex_id ]], constant Vertex *verticies [[ buffer(0) ]]) {
+vertex Vertex_Out vertex_shader(const uint vertex_ID [[ vertex_id ]], constant Vertex *verticies [[ buffer(0) ]], constant matrix_float4x4 *clip_matrix [[ buffer(1) ]]) {
     Vertex_Out out;
-    out.position = verticies[vertex_ID].position;
+    out.position = *clip_matrix * verticies[vertex_ID].position;
+    // out.position = verticies[vertex_ID].position;
     out.texture_coordinate = verticies[vertex_ID].texture_coordinate;
 
     return out;

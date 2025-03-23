@@ -7,7 +7,7 @@ Camera::Camera(const vector_float3 &position, const vector_float3 &target,
 
 Camera::~Camera() {}
 
-matrix_float4x4 Camera::get_camera_matrix(const float aspect_ratio) {
+matrix_float4x4 Camera::get_camera_matrix4x4(const float aspect_ratio) {
   return matrix_multiply(
       apple_math::make_perspective_projection_matrix4x4(m_fov, aspect_ratio,
                                                         m_near_z, m_far_z),

@@ -42,7 +42,9 @@ private:
 
   void render_object(const std::shared_ptr<Object> &obj,
                      MTL::RenderCommandEncoder *render_command_encoder,
-                     const MTL::Buffer *vertex_buffer);
+                     const MTL::Buffer *vertex_buffer,
+                     MTL::Buffer *clip_matrix_buffer,
+                     const matrix_float4x4 &camera_matrix);
 
   static void framebuffer_size_callback(GLFWwindow *window, const int width,
                                         const int height);

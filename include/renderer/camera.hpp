@@ -15,5 +15,5 @@ public:
          const radians fov, const float near_z, const float far_z);
   ~Camera();
 
-  matrix_float4x4 get_camera_matrix(const float aspect_ratio);
+  matrix_float4x4 get_camera_matrix4x4(const float aspect_ratio);
 };
