@@ -36,15 +36,16 @@ Engine::Engine(const int width, const int height)
 Engine::~Engine() {
   glfwTerminate();
 
-  m_device->release();
-
   for (auto &buffer : m_vertex_buffers)
     buffer->release();
+
+  m_render_pso->release();
+  m_command_queue->release();
+  m_default_library->release();
+  m_device->release();
 }
 
-MTL::Device *Engine::get_device() {
-  return m_device;
-}
+MTL::Device *Engine::get_device() { return m_device; }
 
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
@@ -108,13 +109,14 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
                            MTL::RenderCommandEncoder *render_command_encoder,
                            const MTL::Buffer *vertex_buffer) {
   render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
+
+  Texture *texture = obj->get_texture();
+  if (texture)
+    render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
+
   render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
                                          static_cast<NS::UInteger>(0),
                                          obj->get_vertex_count());
-
-    Texture *texture = obj->get_texture();
-    if (texture)
-        render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 }
 
 void Engine::render() {

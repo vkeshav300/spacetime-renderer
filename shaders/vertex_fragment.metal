@@ -17,8 +17,7 @@ vertex Vertex_Out vertex_shader(const uint vertex_ID [[ vertex_id ]], constant V
     return out;
 }
 
-constexpr sampler texture_sampler = (mag_filter::linear, min_filter::linear);
-
 fragment vector_float4 fragment_shader(Vertex_Out in [[ stage_in ]], texture2d<float> color_texture [[ texture(0) ]]) {
+    constexpr sampler texture_sampler(mag_filter::linear, min_filter::linear);
     return color_texture.sample(texture_sampler, in.texture_coordinate);
 }

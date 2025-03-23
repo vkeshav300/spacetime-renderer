@@ -6,7 +6,7 @@
 #include <array>
 
 class Square: public Object_I<Square> {
-protected:
+private:
 	std::array<Vertex, 6> m_verticies;
 	
 	Texture *m_texture;
