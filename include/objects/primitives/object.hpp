@@ -2,6 +2,7 @@
 
 #include "../../renderer/gpu_buffers.h"
 #include "../../renderer/texture.hpp"
+#include "../../apple_math.h"
 
 #include <Metal/Metal.hpp>
 #include <simd/simd.h>
@@ -26,5 +27,5 @@ public:
   virtual void translate(const float x, const float y, const float z) = 0;
   virtual vector_float4 get_rotations() const = 0;
   virtual void rotate(const float x, const float y, const float z,
-                      const float magnitude) = 0;
+                      const float radians) = 0;
 };

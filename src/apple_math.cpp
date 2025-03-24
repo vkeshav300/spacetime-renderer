@@ -62,13 +62,12 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
     const radians fov, const float aspect_ratio, const float near_z,
     const float far_z) {
   const float ys = 1 / std::tan(fov * 0.5f), xs = ys / aspect_ratio,
-              zs = far_z / (far_z - near_z), zn = near_z * zs;
+              zs = far_z / (far_z - near_z), zn = -(near_z * far_z) / (near_z - far_z);
 
-  return make_matrix4x4(xs, 0, 0, 0, 0, ys, 0, 0, 0, 0, zs, -zn, 0, 0, 1, 0);
+  return make_matrix4x4(xs, 0, 0, 0, 0, ys, 0, 0, 0, 0, zs, zn, 0, 0, 1, 0);
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
   return make_matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 }
-
 } // namespace apple_math

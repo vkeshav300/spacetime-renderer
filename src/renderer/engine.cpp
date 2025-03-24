@@ -4,6 +4,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <iostream>
+
 Engine::Engine(std::shared_ptr<Camera> camera, const int width,
                const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
@@ -117,10 +119,10 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
                            MTL::Buffer *clip_matrix_buffer,
                            const matrix_float4x4 &camera_matrix) {
   /* Calculate clip matrix from transformations */
-  const matrix_float4x4 clip_matrix = matrix_multiply(
-      matrix_multiply(camera_matrix, apple_math::make_translation_matrix4x4(
-                                         obj->get_translations())),
-      apple_math::make_rotation_matrix4x4(obj->get_rotations()));
+  const matrix_float4x4 translation_matrix = apple_math::make_translation_matrix4x4(obj->get_translations()),
+                        rotation_matrix = apple_math::make_rotation_matrix4x4(obj->get_rotations()),
+                        model_matrix = matrix_multiply(translation_matrix, rotation_matrix),
+                        clip_matrix = matrix_multiply(camera_matrix, model_matrix);
 
   const Transformations transformations = {clip_matrix};
   std::memcpy(clip_matrix_buffer->contents(), &transformations,

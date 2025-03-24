@@ -3,6 +3,7 @@
 #include "../../renderer/gpu_buffers.h"
 #include "../../renderer/texture.hpp"
 #include "object.hpp"
+#include "../../apple_math.h"
 
 #include <Metal/Metal.hpp>
 #include <simd/simd.h>
@@ -43,7 +44,7 @@ public:
   }
 
   void rotate(const float x, const float y, const float z,
-              const float magnitude) override {
+              const radians magnitude) override {
     m_derived->m_rotations = vector_float4{x, y, z, magnitude};
   }
 };
