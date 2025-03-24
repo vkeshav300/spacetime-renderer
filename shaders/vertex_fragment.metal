@@ -12,7 +12,6 @@ struct Vertex_Out {
 vertex Vertex_Out vertex_shader(const uint vertex_ID [[ vertex_id ]], constant Vertex *verticies [[ buffer(0) ]], constant Transformations *transformations [[ buffer(1) ]]) {
     Vertex_Out out;
     out.position = transformations->clip_matrix * verticies[vertex_ID].position;
-    // out.position = verticies[vertex_ID].position;
     out.texture_coordinate = verticies[vertex_ID].texture_coordinate;
 
     return out;

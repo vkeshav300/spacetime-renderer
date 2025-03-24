@@ -27,6 +27,7 @@ int main() {
 
   Square *shape = new Square();
   shape->set_texture(texture);
+  shape->translate(0, 0, 2);
   engine.add_object(shape);
 
   engine.stage();
