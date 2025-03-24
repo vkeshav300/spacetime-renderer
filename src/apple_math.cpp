@@ -68,4 +68,8 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
                         -1, 0);
 }
 
+matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
+  return make_matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+}
+
 } // namespace apple_math

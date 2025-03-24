@@ -32,4 +32,6 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_look_at_matrix4x4(
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
     const radians fov, const float aspect_ratio, const float near_z,
     const float far_z);
+
+matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4();
 } // namespace apple_math
