@@ -1,19 +1,22 @@
 #pragma once
 
-#include "object_i.hpp"
 #include "../../renderer/gpu_buffers.h"
+#include "object_i.hpp"
 
 #include <array>
+#include <memory>
 
-class Triangle: public Object_I<Triangle> {
-private:
-	std::array<Vertex, 3> m_verticies;
-	
-	Texture *m_texture;
+class Triangle : public Object_I<Triangle> {
+protected:
+  std::array<Vertex, 3> m_vertices = {
+      {{{-0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+       {{0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+       {{0.0f, 0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}}}};
 
-	friend class Object_I<Triangle>;
+  std::shared_ptr<Texture> m_texture;
+
+  friend class Object_I<Triangle>;
 
 public:
-	Triangle();
-	~Triangle();
+  Triangle();
 };

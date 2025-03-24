@@ -1,11 +1,15 @@
 #include "renderer/engine.hpp"
 #include "bridges/glfw.hpp"
 
+#include <cstring>
 #include <stdexcept>
 
-Engine::Engine(const int width, const int height)
+#include <iostream>
+
+Engine::Engine(std::shared_ptr<Camera> camera, const int width,
+               const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
-      m_layer(CA::MetalLayer::layer()) {
+      m_layer(CA::MetalLayer::layer()), m_camera(camera) {
   glfwInit();
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]",
@@ -36,18 +40,27 @@ Engine::Engine(const int width, const int height)
 Engine::~Engine() {
   glfwTerminate();
 
-  m_device->release();
-
   for (auto &buffer : m_vertex_buffers)
     buffer->release();
+
+  for (auto &buffer : m_clip_matrix_buffers)
+    buffer->release();
+
+  m_render_pso->release();
+  m_command_queue->release();
+  m_default_library->release();
+  m_device->release();
 }
+
+MTL::Device *Engine::get_device() { return m_device; }
 
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
-  m_vertex_buffers.push_back(nullptr);
-  m_vertex_buffers[obj_index] = m_device->newBuffer(
+  m_vertex_buffers.push_back(m_device->newBuffer(
       obj->get_vertex_carray(), obj->get_vertex_count() * sizeof(Vertex),
-      MTL::ResourceStorageModeShared);
+      MTL::ResourceStorageModeShared));
+  m_clip_matrix_buffers.push_back(m_device->newBuffer(
+      sizeof(matrix_float4x4), MTL::ResourceStorageModeShared));
   m_objects.push_back(std::shared_ptr<Object>(obj));
 }
 
@@ -102,15 +115,30 @@ void Engine::stage() {
 
 void Engine::render_object(const std::shared_ptr<Object> &obj,
                            MTL::RenderCommandEncoder *render_command_encoder,
-                           const MTL::Buffer *vertex_buffer) {
+                           const MTL::Buffer *vertex_buffer,
+                           MTL::Buffer *clip_matrix_buffer,
+                           const matrix_float4x4 &camera_matrix) {
+  /* Calculate clip matrix from transformations */
+  const matrix_float4x4 translation_matrix = apple_math::make_translation_matrix4x4(obj->get_translations()),
+                        rotation_matrix = apple_math::make_rotation_matrix4x4(obj->get_rotations()),
+                        model_matrix = matrix_multiply(translation_matrix, rotation_matrix),
+                        clip_matrix = matrix_multiply(camera_matrix, model_matrix);
+
+  const Transformations transformations = {clip_matrix};
+  std::memcpy(clip_matrix_buffer->contents(), &transformations,
+              sizeof(matrix_float4x4));
+
+  /* Set buffers for vertex shader */
   render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
+  render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
+
+  std::shared_ptr<Texture> texture = obj->get_texture();
+  if (texture)
+    render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
+
   render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
                                          static_cast<NS::UInteger>(0),
                                          obj->get_vertex_count());
-
-    Texture *texture = obj->get_texture();
-    if (texture)
-        render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 }
 
 void Engine::render() {
@@ -146,8 +174,12 @@ void Engine::render() {
     render_pass_descriptor->release();
 
     /* Render objects */
+    const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
+        m_aspect_ratio); // Camera matrix is defined here to only calculate 1
+                         // camera matrix per render pass
     for (size_t i = 0; i < m_objects.size(); i++)
-      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i]);
+      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i],
+                    m_clip_matrix_buffers[i], camera_matrix);
 
     /* Tell GPU frame is renderable */
     m_command_buffer->presentDrawable(m_drawable);

@@ -5,9 +5,10 @@ endif()
 
 cmake_minimum_required(VERSION 3.31.6)
 
- # Define "Debug" in code if build type is debug
+ # Define "DEBUG" in code if build type is debug
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG)
+	set(DEBUG true)
 	message(STATUS "Debug mode enabled")
 endif()
 
@@ -62,8 +63,6 @@ target_link_libraries(
 )
 
 # Shader compilation
-set(SHADER_COMPILATION_FLAGS "")
-
 set(SHADER_SRC_DIR "${CMAKE_SOURCE_DIR}/shaders")
 set(SHADER_BIN_DIR "${CMAKE_BINARY_DIR}/shaders")
 set(METALLIB_OUTPUT "${CMAKE_BINARY_DIR}/default.metallib")
