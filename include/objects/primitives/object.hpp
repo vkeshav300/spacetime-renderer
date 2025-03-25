@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../../apple_math.h"
 #include "../../renderer/gpu_buffers.h"
 #include "../../renderer/texture.hpp"
-#include "../../apple_math.h"
 
 #include <Metal/Metal.hpp>
 #include <simd/simd.h>
