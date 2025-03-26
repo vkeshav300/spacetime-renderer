@@ -3,7 +3,7 @@
 #endif
 
 #include "objects/object.hpp"
-#include "objects/vertices.hpp"
+#include "objects/shapes.hpp"
 #include "renderer/engine.hpp"
 #include "renderer/texture.hpp"
 
@@ -26,7 +26,7 @@ int main() {
       engine.get_device(), "../assets/textures/test.jpg");
 #endif
 
-  Object *obj = new Object(vertices_set::square);
+  Object *obj = new Object(shapes::square);
   obj->set_texture(texture);
   obj->translate(0, 0, 2);
   obj->rotate(0, 0, 0, M_PI / 4);

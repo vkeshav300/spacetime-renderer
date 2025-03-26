@@ -6,7 +6,7 @@
 
 using vertex_vector = std::vector<Vertex>;
 
-namespace vertices_set {
+namespace shapes {
     const vertex_vector triangle = {
         {{{-0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}},
          {{0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}},

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vertices.hpp"
+#include "shapes.hpp"
 #include "../renderer/texture.hpp"
 #include "../apple_math.h"
 
