@@ -14,12 +14,12 @@ protected:
 	vector_float3 m_translations = {0.0f, 0.0f, 0.0f};
 	vector_float4 m_rotations = {0.0f, 0.0f, 0.0f, 0.0f};
 
-	vtx_vec m_vertices;
+	vertex_vector m_vertices;
 
 	std::shared_ptr<Texture> m_texture = nullptr;
 
 public:
-	Object(const vtx_vec &vertices);
+	Object(const vertex_vector &vertices);
 	~Object();
 
 	Vertex *get_vertex_carray();
