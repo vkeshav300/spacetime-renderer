@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../objects/primitives/object.hpp"
+#include "../objects/object.hpp"
 #include "camera.hpp"
 #include "gpu_buffers.h"
 #include "texture.hpp"

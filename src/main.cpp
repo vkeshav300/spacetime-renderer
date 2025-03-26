@@ -2,7 +2,8 @@
 #warning "Debug mode enabled. This can cause heavy performance issues."
 #endif
 
-#include "objects/primitives/square.hpp"
+#include "objects/object.hpp"
+#include "objects/vertices.hpp"
 #include "renderer/engine.hpp"
 #include "renderer/texture.hpp"
 
@@ -25,11 +26,11 @@ int main() {
       engine.get_device(), "../assets/textures/test.jpg");
 #endif
 
-  Square *shape = new Square();
-  shape->set_texture(texture);
-  shape->translate(0, 0, 2);
-  shape->rotate(0, 0, 1, M_PI / 4);
-  engine.add_object(shape);
+  Object *obj = new Object(vertices_set::square);
+  obj->set_texture(texture);
+  obj->translate(0, 0, 2);
+  obj->rotate(0, 0, 0, M_PI / 4);
+  engine.add_object(obj);
 
   engine.stage();
   engine.render();
