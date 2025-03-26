@@ -51,11 +51,11 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_look_at_matrix4x4(
     const vector_float3 &position, const vector_float3 &target) {
   const vector_float3 f = simd_normalize(target - position),
                       r = simd_normalize(simd_cross(vector_float3{0, 1, 0}, f)),
-                      u = simd_cross(f, r), nposition = -position;
+                      u = simd_cross(f, r);
 
-  return make_matrix4x4(r.x, u.x, f.x, simd_dot(nposition, r), r.y, u.y, f.y,
-                        simd_dot(nposition, u), r.z, u.z, f.z,
-                        simd_dot(nposition, f), 0, 0, 0, 1);
+  return make_matrix4x4(r.x, u.x, f.x, 0, r.y, u.y, f.y, 0, r.z, u.z, f.z, 0,
+                        -simd_dot(r, position), -simd_dot(u, position),
+                        -simd_dot(f, position), 1);
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
@@ -64,7 +64,7 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
   const float ys = 1 / std::tan(fov * 0.5f), xs = ys / aspect_ratio,
               zs = far_z / (far_z - near_z), zn = -near_z * zs;
 
-  return make_matrix4x4(xs, 0, 0, 0, 0, ys, 0, 0, 0, 0, zs, zn, 0, 0, 1, 0);
+  return make_matrix4x4(xs, 0, 0, 0, 0, ys, 0, 0, 0, 0, zs, 1, 0, 0, zn, 0);
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
