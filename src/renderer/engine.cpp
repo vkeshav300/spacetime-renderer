@@ -4,8 +4,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <iostream>
-
 Engine::Engine(std::shared_ptr<Camera> camera, const int width,
                const int height)
     : m_device(MTL::CreateSystemDefaultDevice()),
