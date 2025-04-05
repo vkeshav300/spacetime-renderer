@@ -18,6 +18,7 @@ project(
 )
 
 # Project config
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(EXTERNAL_HEADERS_DIR "${CMAKE_SOURCE_DIR}/dependencies")
