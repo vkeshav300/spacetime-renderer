@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.31.6)
  # Define "DEBUG" in code if build type is debug
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG)
-	set(DEBUG true)
 	message(STATUS "Debug mode enabled")
 endif()
 
@@ -18,6 +17,7 @@ project(
 )
 
 # Project config
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(EXTERNAL_HEADERS_DIR "${CMAKE_SOURCE_DIR}/dependencies")
