@@ -26,17 +26,21 @@ Texture::Texture(MTL::Device *device, const char *path) {
   stbi_image_free(img);
 }
 
-Texture::Texture(MTL::Device *device, const MTL::TextureType &texture_type, const MTL::PixelFormat &pixel_format, const double width, const double height, const MTL::TextureUsage &usage, const size_t sample_count) {
-    MTL::TextureDescriptor *texture_descriptor = MTL::TextureDescriptor::alloc()->init();
-    texture_descriptor->setTextureType(texture_type);
-    texture_descriptor->setPixelFormat(pixel_format);
-    texture_descriptor->setWidth(width);
-    texture_descriptor->setHeight(height);
-    texture_descriptor->setUsage(usage);
-    texture_descriptor->setSampleCount(sample_count);
+Texture::Texture(MTL::Device *device, const MTL::TextureType &texture_type,
+                 const MTL::PixelFormat &pixel_format, const double width,
+                 const double height, const MTL::TextureUsage &usage,
+                 const size_t sample_count) {
+  MTL::TextureDescriptor *texture_descriptor =
+      MTL::TextureDescriptor::alloc()->init();
+  texture_descriptor->setTextureType(texture_type);
+  texture_descriptor->setPixelFormat(pixel_format);
+  texture_descriptor->setWidth(width);
+  texture_descriptor->setHeight(height);
+  texture_descriptor->setUsage(usage);
+  texture_descriptor->setSampleCount(sample_count);
 
-    m_texture = device->newTexture(texture_descriptor);
-    texture_descriptor->release();
+  m_texture = device->newTexture(texture_descriptor);
+  texture_descriptor->release();
 }
 
 Texture::~Texture() { m_texture->release(); }

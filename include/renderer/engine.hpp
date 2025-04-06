@@ -50,7 +50,7 @@ private:
                      const MTL::Buffer *vertex_buffer,
                      MTL::Buffer *clip_matrix_buffer,
                      const matrix_float4x4 &camera_matrix);
-  
+
   void create_depth_msaa_textures();
 
   void create_render_pass_descriptor();
@@ -62,7 +62,8 @@ private:
   void resize_framebuffer(const int width, const int height);
 
 public:
-  Engine(std::shared_ptr<Camera> camera, const int width, const int height, const size_t m_sample_count);
+  Engine(std::shared_ptr<Camera> camera, const int width, const int height,
+         const size_t m_sample_count);
   ~Engine();
 
   MTL::Device *get_device();

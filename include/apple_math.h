@@ -21,7 +21,7 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD
 make_translation_matrix4x4(const vector_float3 &translations);
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_rotation_matrix4x4(const radians theta,
-                                                            vector_float3 axis);
+                                                            vector_float3 &axis);
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD
 make_rotation_matrix4x4(const vector_float4 &rotations);

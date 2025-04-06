@@ -1,7 +1,7 @@
 #pragma once
 
+#include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
-#include <Foundation/Foundation.hpp> 
 
 #include <stb_image.h>
 
@@ -12,7 +12,10 @@ private:
 
 public:
   Texture(MTL::Device *device, const char *path);
-  Texture(MTL::Device *device, const MTL::TextureType &texture_type, const MTL::PixelFormat &pixel_format, const double width, const double height, const MTL::TextureUsage &usage, const size_t sample_count);
+  Texture(MTL::Device *device, const MTL::TextureType &texture_type,
+          const MTL::PixelFormat &pixel_format, const double width,
+          const double height, const MTL::TextureUsage &usage,
+          const size_t sample_count);
   ~Texture();
 
   MTL::Texture *get_mtl_texture() const;
