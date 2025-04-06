@@ -12,12 +12,12 @@ const vertex_vector triangle = {{{{-0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}},
                                  {{0.0f, 0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}}}};
 
 const vertex_vector square = {{
-    {{-0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 0.0f}}, // Bottom-left
-    {{-0.5f, 0.5f, 0.5f, 1.0f}, {0.0f, 1.0f}},  // Top-left
-    {{0.5f, 0.5f, 0.5f, 1.0f}, {1.0f, 1.0f}},   // Top-right
-    {{-0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 0.0f}}, // Bottom-left (again)
-    {{0.5f, 0.5f, 0.5f, 1.0f}, {1.0f, 1.0f}},   // Top-right
-    {{0.5f, -0.5f, 0.5f, 1.0f}, {1.0f, 0.0f}}   // Bottom-right
+    {{0.5f, -0.5f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // Bottom right
+    {{0.5f, 0.5f, 0.0f, 1.0f}, {1.0f, 1.0f}}, // Top right
+    {{-0.5f, 0.5f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top left
+    {{-0.5f, 0.5f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // Top left
+    {{-0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.0f}}, // Bottom left
+    {{0.5f, -0.5f, 0.0f, 1.0f}, {1.0f, 0.0f}} // Bottom right
 }};
 
 const vertex_vector cube = {
