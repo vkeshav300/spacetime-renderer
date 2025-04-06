@@ -1,13 +1,14 @@
 #include "renderer/engine.hpp"
 #include "bridges/glfw.hpp"
+#include "renderer/gpu_buffers.h"
 
 #include <cstring>
 #include <stdexcept>
 
 Engine::Engine(std::shared_ptr<Camera> camera, const int width,
-               const int height)
+               const int height, const size_t sample_count)
     : m_device(MTL::CreateSystemDefaultDevice()),
-      m_layer(CA::MetalLayer::layer()), m_camera(camera) {
+      m_layer(CA::MetalLayer::layer()), m_camera(camera), m_sample_count(sample_count) {
   glfwInit();
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   m_window = glfwCreateWindow(width, height, "Spacetime Renderer [Metal]",
@@ -44,6 +45,8 @@ Engine::~Engine() {
   for (auto &buffer : m_clip_matrix_buffers)
     buffer->release();
 
+  m_render_command_encoder->release();
+  m_render_pass_descriptor->release();
   m_render_pso->release();
   m_command_queue->release();
   m_default_library->release();
@@ -70,6 +73,8 @@ void Engine::create_render_pipeline() {
       "Spacetime Renderer Rendering Pipeline", NS::ASCIIStringEncoding));
   render_pipeline_descriptor->colorAttachments()->object(0)->setPixelFormat(
       m_layer->pixelFormat());
+  render_pipeline_descriptor->setSampleCount(m_sample_count);
+  render_pipeline_descriptor->setDepthAttachmentPixelFormat(MTL::PixelFormatDepth32Float);
 
   /* Set vertex shader */
   MTL::Function *vertex_shader = m_default_library->newFunction(
@@ -95,8 +100,56 @@ void Engine::create_render_pipeline() {
                                                   &render_pso_error);
   if (render_pso_error)
     throw std::runtime_error("Failed to create render pipeline state");
-
+  
   render_pipeline_descriptor->release();
+
+  MTL::DepthStencilDescriptor *depth_stencil_descriptor = MTL::DepthStencilDescriptor::alloc()->init();
+  depth_stencil_descriptor->setDepthCompareFunction(MTL::CompareFunctionLessEqual);
+  depth_stencil_descriptor->setDepthWriteEnabled(true);
+
+  m_depth_stencil_state = m_device->newDepthStencilState(depth_stencil_descriptor);
+  depth_stencil_descriptor->release();
+}
+
+void Engine::create_depth_msaa_textures() {
+    const CGSize drawable_size = m_layer->drawableSize();
+
+    m_msaa_texture.reset(new Texture(
+       m_device,
+       MTL::TextureType2DMultisample, 
+       MTL::PixelFormatBGRA8Unorm,
+       drawable_size.width,
+       drawable_size.height,
+       MTL::TextureUsageRenderTarget,
+       m_sample_count
+    ));
+
+    m_depth_texture.reset(new Texture(
+        m_device,
+        MTL::TextureType2DMultisample,
+        MTL::PixelFormatDepth32Float,
+        drawable_size.width,
+        drawable_size.height,
+        MTL::TextureUsageRenderTarget,
+        m_sample_count
+    ));
+}
+
+void Engine::create_render_pass_descriptor() {
+    m_render_pass_descriptor = MTL::RenderPassDescriptor::alloc()->init();
+
+    MTL::RenderPassColorAttachmentDescriptor *color_attachment = m_render_pass_descriptor->colorAttachments()->object(0);
+    color_attachment->setTexture(m_msaa_texture->get_mtl_texture());
+    color_attachment->setResolveTexture(m_drawable->texture());
+    color_attachment->setLoadAction(MTL::LoadActionClear);
+    color_attachment->setClearColor(MTL::ClearColor(41.0f/255.0f, 42.0f/255.0f, 48.0f/255.0f, 1.0));
+    color_attachment->setStoreAction(MTL::StoreActionMultisampleResolve);
+
+    MTL::RenderPassDepthAttachmentDescriptor *depth_attachment = m_render_pass_descriptor->depthAttachment();
+    depth_attachment->setTexture(m_depth_texture->get_mtl_texture());
+    depth_attachment->setLoadAction(MTL::LoadActionClear);
+    depth_attachment->setStoreAction(MTL::StoreActionDontCare);
+    depth_attachment->setClearDepth(1.0f);
 }
 
 void Engine::stage() {
@@ -109,10 +162,20 @@ void Engine::stage() {
   m_command_queue = m_device->newCommandQueue();
 
   create_render_pipeline();
+  create_depth_msaa_textures();
+  m_drawable = m_layer->nextDrawable();
+  create_render_pass_descriptor();
+}
+
+void Engine::update_render_pass_descriptor() {
+    MTL::RenderPassColorAttachmentDescriptor *color_attachment = m_render_pass_descriptor->colorAttachments()->object(0);
+    color_attachment->setTexture(m_msaa_texture->get_mtl_texture());
+    color_attachment->setResolveTexture(m_drawable->texture());
+
+    m_render_pass_descriptor->depthAttachment()->setTexture(m_depth_texture->get_mtl_texture());
 }
 
 void Engine::render_object(const std::shared_ptr<Object> &obj,
-                           MTL::RenderCommandEncoder *render_command_encoder,
                            const MTL::Buffer *vertex_buffer,
                            MTL::Buffer *clip_matrix_buffer,
                            const matrix_float4x4 &camera_matrix) {
@@ -132,14 +195,14 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
               sizeof(matrix_float4x4));
 
   /* Set buffers for vertex shader */
-  render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
-  render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
+  m_render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
+  m_render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
 
   std::shared_ptr<Texture> texture = obj->get_texture();
   if (texture)
-    render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
+    m_render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 
-  render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
+  m_render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
                                          static_cast<NS::UInteger>(0),
                                          obj->get_vertex_count());
 }
@@ -160,33 +223,22 @@ void Engine::render() {
     m_command_buffer = m_command_queue->commandBuffer();
 
     /* Create render command */
-    MTL::RenderPassDescriptor *render_pass_descriptor =
-        MTL::RenderPassDescriptor::alloc()->init();
-    MTL::RenderPassColorAttachmentDescriptor *color_descriptor =
-        render_pass_descriptor->colorAttachments()->object(0);
-    color_descriptor->setTexture(m_drawable->texture());
-    color_descriptor->setLoadAction(MTL::LoadActionClear);
-    color_descriptor->setClearColor(
-        MTL::ClearColor(41.0f / 255.0f, 42.0f / 255.0f, 48.0f / 255.0f, 1.0));
-    color_descriptor->setStoreAction(MTL::StoreActionStore);
-
-    MTL::RenderCommandEncoder *render_command_encoder =
-        m_command_buffer->renderCommandEncoder(render_pass_descriptor);
-    render_command_encoder->setRenderPipelineState(m_render_pso);
-
-    render_pass_descriptor->release();
+    update_render_pass_descriptor();
+    m_render_command_encoder =
+        m_command_buffer->renderCommandEncoder(m_render_pass_descriptor);
+    m_render_command_encoder->setRenderPipelineState(m_render_pso);
 
     /* Render objects */
     const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
         m_aspect_ratio); // Camera matrix is defined here to only calculate 1
                          // camera matrix per render pass
     for (size_t i = 0; i < m_objects.size(); i++)
-      render_object(m_objects[i], render_command_encoder, m_vertex_buffers[i],
+      render_object(m_objects[i], m_vertex_buffers[i],
                     m_clip_matrix_buffers[i], camera_matrix);
 
     /* Tell GPU frame is renderable */
     m_command_buffer->presentDrawable(m_drawable);
-    render_command_encoder->endEncoding();
+    m_render_command_encoder->endEncoding();
     m_command_buffer->commit();
 
 #ifdef DEBUG
@@ -209,4 +261,10 @@ void Engine::framebuffer_size_callback(GLFWwindow *window, const int width,
 void Engine::resize_framebuffer(const int width, const int height) {
   m_layer->setDrawableSize(CGSizeMake(width, height));
   m_aspect_ratio = static_cast<float>(width) / height;
+
+  create_depth_msaa_textures();
+  
+  m_drawable = m_layer->nextDrawable();
+  if (m_drawable)
+      update_render_pass_descriptor();
 }

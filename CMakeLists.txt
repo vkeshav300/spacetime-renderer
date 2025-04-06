@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.31.6)
  # Define "DEBUG" in code if build type is debug
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG)
-	set(DEBUG true)
 	message(STATUS "Debug mode enabled")
 endif()
 
