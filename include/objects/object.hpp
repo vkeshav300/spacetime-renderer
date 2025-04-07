@@ -11,12 +11,14 @@
 
 class Object {
 protected:
-  vector_float3 m_translations = {0.0f, 0.0f, 0.0f};
-  vector_float4 m_rotations = {0.0f, 0.0f, 0.0f, 0.0f};
+  std::shared_ptr<Texture> m_texture = nullptr;
 
+  MTL::Buffer *m_vertex_buffer;
   vertex_vector m_vertices;
 
-  std::shared_ptr<Texture> m_texture = nullptr;
+  MTL::Buffer *m_transformations_buffer;
+  vector_float3 m_translations = {0.0f, 0.0f, 0.0f};
+  vector_float4 m_rotations = {0.0f, 0.0f, 0.0f, 0.0f};
 
 public:
   Object(const vertex_vector &vertices);
@@ -24,10 +26,14 @@ public:
 
   Vertex *get_vertex_carray();
   NS::UInteger get_vertex_count() const;
+  MTL::Buffer *get_vertex_buffer() const;
+  void set_vertex_buffer(MTL::Buffer *vertex_buffer);
 
   void set_texture(std::shared_ptr<Texture> texture);
   std::shared_ptr<Texture> get_texture() const;
 
+  MTL::Buffer *get_transformations_buffer() const;
+  void set_transformations_buffer(MTL::Buffer *transformations_buffer);
   vector_float3 get_translations() const;
   vector_float4 get_rotations() const;
   void translate(const float x, const float y, const float z);

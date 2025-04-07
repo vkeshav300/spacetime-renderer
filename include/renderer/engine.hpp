@@ -38,8 +38,6 @@ private:
   CA::MetalDrawable *m_drawable;
 
   std::vector<std::shared_ptr<Object>> m_objects;
-  std::vector<MTL::Buffer *> m_vertex_buffers;
-  std::vector<MTL::Buffer *> m_clip_matrix_buffers;
 
   std::shared_ptr<Texture> m_msaa_texture, m_depth_texture;
 
@@ -47,8 +45,6 @@ private:
   void create_render_pipeline();
 
   void render_object(const std::shared_ptr<Object> &obj,
-                     const MTL::Buffer *vertex_buffer,
-                     MTL::Buffer *clip_matrix_buffer,
                      const matrix_float4x4 &camera_matrix);
 
   void create_depth_msaa_textures();

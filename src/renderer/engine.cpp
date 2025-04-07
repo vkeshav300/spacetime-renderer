@@ -40,12 +40,6 @@ Engine::Engine(std::shared_ptr<Camera> camera, const int width,
 Engine::~Engine() {
   glfwTerminate();
 
-  for (auto &buffer : m_vertex_buffers)
-    buffer->release();
-
-  for (auto &buffer : m_clip_matrix_buffers)
-    buffer->release();
-
   m_render_command_encoder->release();
   m_render_pass_descriptor->release();
   m_render_pso->release();
@@ -58,12 +52,12 @@ MTL::Device *Engine::get_device() { return m_device; }
 
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
-  m_vertex_buffers.push_back(m_device->newBuffer(
+  m_objects.push_back(std::shared_ptr<Object>(obj));
+  m_objects[obj_index]->set_vertex_buffer(m_device->newBuffer(
       obj->get_vertex_carray(), obj->get_vertex_count() * sizeof(Vertex),
       MTL::ResourceStorageModeShared));
-  m_clip_matrix_buffers.push_back(m_device->newBuffer(
-      sizeof(matrix_float4x4), MTL::ResourceStorageModeShared));
-  m_objects.push_back(std::shared_ptr<Object>(obj));
+  m_objects[obj_index]->set_transformations_buffer(m_device->newBuffer(
+      sizeof(Transformations), MTL::ResourceStorageModeShared));
 }
 
 void Engine::create_render_pipeline() {
@@ -176,8 +170,6 @@ void Engine::update_render_pass_descriptor() {
 }
 
 void Engine::render_object(const std::shared_ptr<Object> &obj,
-                           const MTL::Buffer *vertex_buffer,
-                           MTL::Buffer *clip_matrix_buffer,
                            const matrix_float4x4 &camera_matrix) {
   /* Calculate clip matrix from transformations */
   const matrix_float4x4 translation_matrix =
@@ -191,12 +183,13 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
                             matrix_multiply(camera_matrix, model_matrix);
 
   const Transformations transformations = {clip_matrix};
-  std::memcpy(clip_matrix_buffer->contents(), &transformations,
-              sizeof(matrix_float4x4));
+  std::memcpy(obj->get_transformations_buffer()->contents(), &transformations,
+              sizeof(Transformations));
 
   /* Set buffers for vertex shader */
-  m_render_command_encoder->setVertexBuffer(vertex_buffer, 0, 0);
-  m_render_command_encoder->setVertexBuffer(clip_matrix_buffer, 0, 1);
+  m_render_command_encoder->setVertexBuffer(obj->get_vertex_buffer(), 0, 0);
+  m_render_command_encoder->setVertexBuffer(obj->get_transformations_buffer(),
+                                            0, 1);
 
   std::shared_ptr<Texture> texture = obj->get_texture();
   if (texture)
@@ -226,19 +219,22 @@ void Engine::render() {
     update_render_pass_descriptor();
     m_render_command_encoder =
         m_command_buffer->renderCommandEncoder(m_render_pass_descriptor);
-    m_render_command_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
+    m_render_command_encoder->setFrontFacingWinding(
+        MTL::WindingCounterClockwise);
     m_render_command_encoder->setCullMode(MTL::CullModeBack);
     m_render_command_encoder->setRenderPipelineState(m_render_pso);
     m_render_command_encoder->setDepthStencilState(m_depth_stencil_state);
+
+#ifdef RENDER_WIREFRAME
     m_render_command_encoder->setTriangleFillMode(MTL::TriangleFillModeLines);
+#endif
 
     /* Render objects */
     const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
         m_aspect_ratio); // Camera matrix is defined here to only calculate 1
                          // camera matrix per render pass
     for (size_t i = 0; i < m_objects.size(); i++)
-      render_object(m_objects[i], m_vertex_buffers[i], m_clip_matrix_buffers[i],
-                    camera_matrix);
+      render_object(m_objects[i], camera_matrix);
 
     /* Tell GPU frame is renderable */
     m_command_buffer->presentDrawable(m_drawable);
