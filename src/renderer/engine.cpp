@@ -230,7 +230,10 @@ void Engine::render() {
     m_render_command_encoder->setCullMode(MTL::CullModeBack);
     m_render_command_encoder->setRenderPipelineState(m_render_pso);
     m_render_command_encoder->setDepthStencilState(m_depth_stencil_state);
+    
+#ifdef RENDER_WIREFRAME
     m_render_command_encoder->setTriangleFillMode(MTL::TriangleFillModeLines);
+#endif
 
     /* Render objects */
     const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
