@@ -40,7 +40,6 @@ Engine::Engine(std::shared_ptr<Camera> camera, const int width,
 Engine::~Engine() {
   glfwTerminate();
 
-  m_render_command_encoder->release();
   m_render_pass_descriptor->release();
   m_render_pso->release();
   m_command_queue->release();
