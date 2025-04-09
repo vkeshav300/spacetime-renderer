@@ -3,6 +3,7 @@
 #include "../objects/object.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+#include "../renderer/color.h"
 
 #include <AppKit/AppKit.hpp>
 #include <Foundation/Foundation.hpp>

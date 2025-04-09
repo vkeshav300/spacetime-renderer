@@ -28,17 +28,17 @@ make_translation_matrix4x4(const vector_float3 &translations) {
 matrix_float4x4 APPLE_SIMD_OVERLOAD
 make_rotation_matrix4x4(const radians theta, vector_float3 axis) {
   if ((simd_length(axis) == 0) | (theta == 0))
-    return make_matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    return make_identity_matrix4x4();
 
   axis = simd_normalize(axis);
 
-  const float x = axis.x, y = axis.y, z = axis.z, ct = std::cosf(theta),
-              st = std::sinf(theta), ci = 1 - ct;
+  const float ct = std::cosf(theta), st = std::sinf(theta), ci = 1 - ct,
+              x = axis.x, y = axis.y, z = axis.z;
 
   return make_matrix4x4(
-      ct + x * x * ci, x * y * ci - z * st, x * z * ci + y * st, 0,
-      y * x * ci + z * st, ct + y * y * ci, y * z * ci - x * st, 0,
-      z * x * ci - y * st, z * y * ci + x * st, ct + z * z * ci, 0, 0, 0, 0, 1);
+      x * x * ci + ct, x * y * ci - z * st, x * z * ci + y * st, 0,
+      x * y * ci + z * st, y * y * ci + ct, y * z * ci - x * st, 0,
+      x * z * ci - y * st, y * z * ci + x * st, z * z * ci + ct, 0, 0, 0, 0, 1);
 }
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD
