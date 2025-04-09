@@ -171,15 +171,15 @@ void Engine::update_render_pass_descriptor() {
 void Engine::render_object(const std::shared_ptr<Object> &obj,
                            const matrix_float4x4 &camera_matrix) {
   /* Calculate clip matrix from transformations */
-  const matrix_float4x4 translation_matrix =
-                            apple_math::make_translation_matrix4x4(
-                                obj->get_translations()),
-                        rotation_matrix = apple_math::make_rotation_matrix4x4(
-                            obj->get_rotations()),
-                        model_matrix = matrix_multiply(translation_matrix,
-                                                       rotation_matrix),
-                        clip_matrix =
-                            matrix_multiply(camera_matrix, model_matrix);
+  vector_float4 rotation_data = obj->get_rotations();
+  rotation_data.w *= glfwGetTime();
+
+  const matrix_float4x4
+      translation_matrix = apple_math::make_translation_matrix4x4(
+          obj->get_position()), /* position = translations from origin */
+      rotation_matrix = apple_math::make_rotation_matrix4x4(rotation_data),
+      model_matrix = matrix_multiply(translation_matrix, rotation_matrix),
+      clip_matrix = matrix_multiply(camera_matrix, model_matrix);
 
   const Transformations transformations = {clip_matrix};
   std::memcpy(obj->get_transformations_buffer()->contents(), &transformations,

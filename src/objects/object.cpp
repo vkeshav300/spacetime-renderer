@@ -13,8 +13,8 @@ Vertex *Object::get_vertex_carray() { return m_vertices.data(); }
 
 NS::UInteger Object::get_vertex_count() const { return m_vertices.size(); }
 
-void Object::set_texture(std::shared_ptr<Texture> texture) {
-  m_texture = texture;
+void Object::set_texture(Texture *texture) {
+  m_texture = std::shared_ptr<Texture>(texture);
 }
 
 MTL::Buffer *Object::get_vertex_buffer() const { return m_vertex_buffer; }
@@ -33,12 +33,12 @@ void Object::set_transformations_buffer(MTL::Buffer *transformations_buffer) {
   m_transformations_buffer = transformations_buffer;
 }
 
-vector_float3 Object::get_translations() const { return m_translations; }
+vector_float3 Object::get_position() const { return m_position; }
 
 vector_float4 Object::get_rotations() const { return m_rotations; }
 
-void Object::translate(const float x, const float y, const float z) {
-  m_translations = vector_float3{x, y, z};
+void Object::move(const float x, const float y, const float z) {
+  m_position = vector_float3{x, y, z};
 }
 
 void Object::rotate(const float x, const float y, const float z,
