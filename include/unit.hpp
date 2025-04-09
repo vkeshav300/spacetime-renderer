@@ -21,13 +21,13 @@ public:
 };
 
 /* Wavelength (same as distance, different base unit) */
-Unit operator""_nm(const long double wavelength);  // Nanometers
+Unit operator""_nm(const long double wavelength);  // Nanometers (base)
 Unit operator""_ang(const long double wavelength); // Angstroms
 
 Unit operator""_nm(const unsigned long long wavelength);
 Unit operator""_ang(const unsigned long long wavelength);
 
 /* Temperature */
-Unit operator""_K(const long double temperature); // Kelvin
+Unit operator""_K(const long double temperature); // Kelvin (base)
 
 Unit operator""_K(const unsigned long long temperature);
