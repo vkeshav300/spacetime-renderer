@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../apple_math.h"
+#include "../calculations.hpp"
 #include "../renderer/texture.hpp"
 #include "shapes.hpp"
 
