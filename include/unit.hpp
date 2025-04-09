@@ -20,7 +20,14 @@ public:
   Unit &operator/=(const float scale);
 };
 
-template <typename Derived> Derived &unit_cast(Unit &unit) {
-  Derived *derived_ptr = static_cast<Derived *>(&unit);
-  return *derived_ptr;
-}
+/* Wavelength (same as distance, different base unit) */
+Unit operator""_nm(const long double wavelength);  // Nanometers
+Unit operator""_ang(const long double wavelength); // Angstroms
+
+Unit operator""_nm(const unsigned long long wavelength);
+Unit operator""_ang(const unsigned long long wavelength);
+
+/* Temperature */
+Unit operator""_K(const long double temperature); // Kelvin
+
+Unit operator""_K(const unsigned long long temperature);
