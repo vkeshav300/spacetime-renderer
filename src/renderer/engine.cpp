@@ -1,6 +1,7 @@
 #include "renderer/engine.hpp"
 #include "bridges/glfw.hpp"
-#include "renderer/gpu_buffers.h"
+#include "renderer/gpu_buffers.hpp"
+#include "renderer/color.h"
 
 #include <cstring>
 #include <stdexcept>
@@ -52,11 +53,18 @@ MTL::Device *Engine::get_device() { return m_device; }
 void Engine::add_object(Object *obj) {
   const size_t obj_index = m_objects.size();
   m_objects.push_back(std::shared_ptr<Object>(obj));
+
   m_objects[obj_index]->set_vertex_buffer(m_device->newBuffer(
       obj->get_vertex_carray(), obj->get_vertex_count() * sizeof(Vertex),
       MTL::ResourceStorageModeShared));
+
   m_objects[obj_index]->set_transformations_buffer(m_device->newBuffer(
       sizeof(Transformations), MTL::ResourceStorageModeShared));
+
+  Appearance appearance = {m_objects[obj_index]->get_texture() ? true : false,
+                           m_objects[obj_index]->get_color()};
+  m_objects[obj_index]->set_appearance_buffer(m_device->newBuffer(
+      &appearance, sizeof(Appearance), MTL::ResourceStorageModeShared));
 }
 
 void Engine::create_render_pipeline() {
@@ -184,15 +192,16 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
   const Transformations transformations = {clip_matrix};
   std::memcpy(obj->get_transformations_buffer()->contents(), &transformations,
               sizeof(Transformations));
+  /* Object appearance */
+  std::shared_ptr<Texture> texture = obj->get_texture();
+  if (texture)
+    m_render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
 
   /* Set buffers for vertex shader */
   m_render_command_encoder->setVertexBuffer(obj->get_vertex_buffer(), 0, 0);
   m_render_command_encoder->setVertexBuffer(obj->get_transformations_buffer(),
                                             0, 1);
-
-  std::shared_ptr<Texture> texture = obj->get_texture();
-  if (texture)
-    m_render_command_encoder->setFragmentTexture(texture->get_mtl_texture(), 0);
+  m_render_command_encoder->setVertexBuffer(obj->get_appearance_buffer(), 0, 2);
 
   m_render_command_encoder->drawPrimitives(MTL::PrimitiveTypeTriangle,
                                            static_cast<NS::UInteger>(0),

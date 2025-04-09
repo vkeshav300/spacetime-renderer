@@ -20,13 +20,8 @@ int main() {
   Object *obj = new Object(shapes::square);
   obj->rotate(0, 0, 1, M_PI / 8);
 
-#ifdef DEBUG
-  obj->set_texture(
-      new Texture(engine.get_device(), "assets/textures/test.jpg"));
-#else
-  obj->set_texture(
-      new Texture(engine.get_device(), "../assets/textures/test.jpg"));
-#endif
+  Color color = {0.0f, 255.0f, 0.0f, 0.0f};
+  obj->set_color(color);
 
   engine.add_object(obj);
 

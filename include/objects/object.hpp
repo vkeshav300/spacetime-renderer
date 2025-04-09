@@ -12,6 +12,8 @@
 class Object {
 protected:
   std::shared_ptr<Texture> m_texture = nullptr;
+  Color m_color;
+  MTL::Buffer *m_appearance_buffer;
 
   MTL::Buffer *m_vertex_buffer;
   vertex_vector m_vertices;
@@ -30,7 +32,11 @@ public:
   void set_vertex_buffer(MTL::Buffer *vertex_buffer);
 
   void set_texture(Texture *texture);
+  void set_color(Color &color);
+  void set_appearance_buffer(MTL::Buffer *appearance_buffer);
   std::shared_ptr<Texture> get_texture() const;
+  Color get_color() const;
+  MTL::Buffer *get_appearance_buffer() const;
 
   MTL::Buffer *get_transformations_buffer() const;
   void set_transformations_buffer(MTL::Buffer *transformations_buffer);

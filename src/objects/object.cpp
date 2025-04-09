@@ -7,15 +7,12 @@ Object::Object(const vertex_vector &vertices) : m_vertices(vertices) {
 Object::~Object() {
   m_vertex_buffer->release();
   m_transformations_buffer->release();
+  m_appearance_buffer->release();
 }
 
 Vertex *Object::get_vertex_carray() { return m_vertices.data(); }
 
 NS::UInteger Object::get_vertex_count() const { return m_vertices.size(); }
-
-void Object::set_texture(Texture *texture) {
-  m_texture = std::shared_ptr<Texture>(texture);
-}
 
 MTL::Buffer *Object::get_vertex_buffer() const { return m_vertex_buffer; }
 
@@ -23,7 +20,27 @@ void Object::set_vertex_buffer(MTL::Buffer *vertex_buffer) {
   m_vertex_buffer = vertex_buffer;
 }
 
+void Object::set_texture(Texture *texture) {
+  m_texture = std::shared_ptr<Texture>(texture);
+}
+
+void Object::set_color(Color &color) {
+  m_texture.reset();
+  m_texture = nullptr;
+  m_color = color;
+}
+
+void Object::set_appearance_buffer(MTL::Buffer *appearance_buffer) {
+  m_appearance_buffer = appearance_buffer;
+}
+
 std::shared_ptr<Texture> Object::get_texture() const { return m_texture; }
+
+Color Object::get_color() const { return m_color; }
+
+MTL::Buffer *Object::get_appearance_buffer() const {
+  return m_appearance_buffer;
+}
 
 MTL::Buffer *Object::get_transformations_buffer() const {
   return m_transformations_buffer;

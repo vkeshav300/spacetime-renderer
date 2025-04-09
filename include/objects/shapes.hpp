@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../renderer/gpu_buffers.h"
+#include "../renderer/gpu_buffers.hpp"
 
 #include <vector>
 
