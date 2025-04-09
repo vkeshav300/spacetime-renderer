@@ -14,6 +14,6 @@ struct Transformations {
 };
 
 struct Appearance {
-    bool textured;
-    Color color;
+  bool textured;
+  Color color;
 };

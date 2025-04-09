@@ -1,7 +1,6 @@
 #include "renderer/engine.hpp"
 #include "bridges/glfw.hpp"
-#include "renderer/gpu_buffers.hpp"
-#include "renderer/color.h"
+#include "renderer/gpu_buffers.h"
 
 #include <cstring>
 #include <stdexcept>
@@ -192,6 +191,7 @@ void Engine::render_object(const std::shared_ptr<Object> &obj,
   const Transformations transformations = {clip_matrix};
   std::memcpy(obj->get_transformations_buffer()->contents(), &transformations,
               sizeof(Transformations));
+
   /* Object appearance */
   std::shared_ptr<Texture> texture = obj->get_texture();
   if (texture)
@@ -238,9 +238,9 @@ void Engine::render() {
 #endif
 
     /* Render objects */
-    const matrix_float4x4 camera_matrix = m_camera->get_camera_matrix4x4(
-        m_aspect_ratio); // Camera matrix is defined here to only calculate 1
-                         // camera matrix per render pass
+    const matrix_float4x4 camera_matrix =
+        m_camera->get_camera_matrix4x4(m_aspect_ratio);
+
     for (size_t i = 0; i < m_objects.size(); i++)
       render_object(m_objects[i], camera_matrix);
 

@@ -1,4 +1,4 @@
-#include "renderer/gpu_buffers.hpp"
+#include "renderer/gpu_buffers.h"
 
 #include <metal_stdlib>
 

@@ -5,7 +5,6 @@
 #include "objects/object.hpp"
 #include "objects/shapes.hpp"
 #include "renderer/engine.hpp"
-#include "renderer/texture.hpp"
 
 #include <simd/simd.h>
 
