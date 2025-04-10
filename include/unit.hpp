@@ -10,10 +10,10 @@ public:
   float get_value() const;
 
   /* Basic math operators */
-  Unit operator+(const Unit &other);
-  Unit operator-(const Unit &other);
-  Unit operator*(const float scale);
-  Unit operator/(const float scale);
+  Unit operator+(const Unit &other) const;
+  Unit operator-(const Unit &other) const;
+  Unit operator*(const float scale) const;
+  Unit operator/(const float scale) const;
 
   /* Compound assignment math operators */
   Unit &operator+=(const Unit &other);
@@ -22,12 +22,12 @@ public:
   Unit &operator/=(const float scale);
 
   /* Comparison operators */
-  bool operator==(const Unit &other);
-  bool operator!=(const Unit &other);
-  bool operator>(const Unit &other);
-  bool operator>=(const Unit &other);
-  bool operator<(const Unit &other);
-  bool operator<=(const Unit &other);
+  bool operator==(const Unit &other) const;
+  bool operator!=(const Unit &other) const;
+  bool operator>(const Unit &other) const;
+  bool operator>=(const Unit &other) const;
+  bool operator<(const Unit &other) const;
+  bool operator<=(const Unit &other) const;
 };
 
 /* Wavelength (same as distance, different base unit) */
