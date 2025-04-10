@@ -1,7 +1,7 @@
 #pragma once
 
 class Unit {
-protected:
+private:
   float m_value;
 
 public:
@@ -9,15 +9,26 @@ public:
 
   float get_value() const;
 
-  friend Unit operator+(const Unit &lhs, const Unit &rhs);
-  friend Unit operator-(const Unit &lhs, const Unit &rhs);
-  friend Unit operator*(const Unit &lhs, const float rhs);
-  friend Unit operator/(const Unit &lhs, const float rhs);
+  /* Basic math operators */
+  Unit operator+(const Unit &other) const;
+  Unit operator-(const Unit &other) const;
+  Unit operator-() const;
+  Unit operator*(const float scale) const;
+  Unit operator/(const float scale) const;
 
+  /* Compound assignment math operators */
   Unit &operator+=(const Unit &other);
   Unit &operator-=(const Unit &other);
   Unit &operator*=(const float scale);
   Unit &operator/=(const float scale);
+
+  /* Comparison operators */
+  bool operator==(const Unit &other) const;
+  bool operator!=(const Unit &other) const;
+  bool operator>(const Unit &other) const;
+  bool operator>=(const Unit &other) const;
+  bool operator<(const Unit &other) const;
+  bool operator<=(const Unit &other) const;
 };
 
 /* Wavelength (same as distance, different base unit) */

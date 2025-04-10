@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../apple_math.h"
+#include "../calculations.hpp"
 #include "../renderer/texture.hpp"
 #include "shapes.hpp"
 
@@ -32,7 +32,7 @@ public:
   void set_vertex_buffer(MTL::Buffer *vertex_buffer);
 
   void set_texture(Texture *texture);
-  void set_color(Color &color);
+  void set_color(const Color &color);
   void set_appearance_buffer(MTL::Buffer *appearance_buffer);
   std::shared_ptr<Texture> get_texture() const;
   Color get_color() const;

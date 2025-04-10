@@ -2,9 +2,11 @@
 #warning "Debug mode enabled. This can cause heavy performance issues."
 #endif
 
+#include "calculations.hpp"
 #include "objects/object.hpp"
 #include "objects/shapes.hpp"
 #include "renderer/engine.hpp"
+#include "unit.hpp"
 
 #include <simd/simd.h>
 
@@ -19,7 +21,9 @@ int main() {
   Object *obj = new Object(shapes::square);
   obj->rotate(0, 0, 1, M_PI / 8);
 
-  Color color = {0.0f, 255.0f, 0.0f, 0.0f};
+  const Unit temperature(5780.0_K),
+      wavelength = blackbodies::get_peak_wavelength(temperature);
+  const Color color(blackbodies::get_rgba_from_wavelength(wavelength));
   obj->set_color(color);
 
   engine.add_object(obj);
