@@ -12,6 +12,7 @@ public:
   /* Basic math operators */
   Unit operator+(const Unit &other) const;
   Unit operator-(const Unit &other) const;
+  Unit operator-() const;
   Unit operator*(const float scale) const;
   Unit operator/(const float scale) const;
 

@@ -12,6 +12,8 @@ Unit Unit::operator-(const Unit &other) const {
   return Unit(m_value - other.m_value);
 }
 
+Unit Unit::operator-() const { return Unit(-m_value); }
+
 Unit Unit::operator*(const float scale) const { return Unit(m_value * scale); }
 
 Unit Unit::operator/(const float scale) const { return Unit(m_value * scale); }
