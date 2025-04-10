@@ -1,5 +1,8 @@
 #pragma once
 
+#include "unit.hpp"
+#include "renderer/color.h"
+
 #define APPLE_SIMD_OVERLOAD __attribute__((__overloadable__))
 
 #include <simd/simd.h>
@@ -35,3 +38,11 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_perspective_projection_matrix4x4(
 
 matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4();
 } // namespace apple_math
+
+namespace blackbodies {
+constexpr float wiens_constant = 2.898e-3f;
+
+Unit get_peak_wavelength(const Unit &temperature);
+
+Color get_rgba_from_wavelength(const Unit &lambda);
+} // namespace blackbodies

@@ -71,3 +71,13 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
   return make_matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 }
 } // namespace apple_math
+
+namespace blackbodies {
+Unit get_peak_wavelength(const Unit &temperature) {
+  return Unit(wiens_constant / temperature.get_value());
+}
+
+Color get_rgba_from_wavelength(const Unit &lambda) {
+    return Color{1.0f, 1.0f, 1.0f, 1.0f};
+}
+} // namespace blackbodies
