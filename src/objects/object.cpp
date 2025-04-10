@@ -24,7 +24,7 @@ void Object::set_texture(Texture *texture) {
   m_texture = std::shared_ptr<Texture>(texture);
 }
 
-void Object::set_color(Color &color) {
+void Object::set_color(const Color &color) {
   m_texture.reset();
   m_texture = nullptr;
   m_color = color;
