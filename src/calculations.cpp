@@ -75,12 +75,15 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
 
 namespace blackbodies {
 Unit get_peak_wavelength(const Unit &temperature) {
-  return Unit(wiens_constant / temperature.get_value());
+  return Unit(1e9f * wiens_constant / temperature.get_value());
 }
 
 Color get_rgba_from_wavelength(const Unit &lambda) {
+  /* It is important to note that this function calculates the RGBA for a given
+   * wavelength, not a blackbody curve with the wavelength being the peak of the
+   * curve */
   Color color;
-  float gamma, lambda_f = lambda.get_value();
+  float factor, lambda_f = lambda.get_value();
 
   /* Calculate rgb */
   if (lambda >= 380.0_nm && lambda < 440.0_nm) {
@@ -115,17 +118,23 @@ Color get_rgba_from_wavelength(const Unit &lambda) {
 
   /* Account for intensity falloff near vision limits */
   if (lambda >= 380.0_nm && lambda < 420.0_nm)
-    gamma = 0.3f + 0.7f * (lambda_f - 380.0f) / 40.0f;
+    factor = 0.3f + 0.7f * (lambda_f - 380.0f) / 40.0f;
   else if (lambda >= 420.0_nm && lambda < 701.0_nm)
-    gamma = 1.0f;
+    factor = 1.0f;
   else if (lambda >= 701.0_nm && lambda < 781.0_nm)
-    gamma = 0.3f + 0.7f * (780.0f - lambda_f) / 80.0f;
+    factor = 0.3f + 0.7f * (780.0f - lambda_f) / 80.0f;
   else
-    gamma = 0.0f;
+    factor = 0.0f;
 
-  color.r = color.r == 0.0f ? 0.0f : 255.0f * pow(color.r * gamma, 0.80f);
-  color.g = color.g == 0.0f ? 0.0f : 255.0f * pow(color.g * gamma, 0.80f);
-  color.b = color.b == 0.0f ? 0.0f : 255.0f * pow(color.b * gamma, 0.80f);
+  color.r = color.r == 0.0f
+                ? 0.0f
+                : rgb_intensity_max * pow(color.r * factor, rgb_gamma);
+  color.g = color.g == 0.0f
+                ? 0.0f
+                : rgb_intensity_max * pow(color.g * factor, rgb_gamma);
+  color.b = color.b == 0.0f
+                ? 0.0f
+                : rgb_intensity_max * pow(color.b * factor, rgb_gamma);
   color.a = 1.0f;
 
   /* Clamp values from rgb range [0, 255] */

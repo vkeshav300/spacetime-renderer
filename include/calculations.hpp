@@ -41,6 +41,8 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4();
 
 namespace blackbodies {
 constexpr float wiens_constant = 2.898e-3f;
+constexpr float rgb_intensity_max = 255.0f;
+constexpr float rgb_gamma = 0.80f;
 
 Unit get_peak_wavelength(const Unit &temperature);
 
