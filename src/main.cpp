@@ -22,8 +22,8 @@ int main() {
   obj->rotate(0, 0, 1, M_PI / 8);
 
   const Unit temperature(5780.0_K),
-      wavelength = blackbodies::get_peak_wavelength(temperature);
-  const Color color(blackbodies::get_rgba_from_wavelength(wavelength));
+      wavelength(physics::blackbodies::get_peak_wavelength(temperature));
+  const Color color(physics::blackbodies::get_rgba_from_wavelength(wavelength));
   obj->set_color(color);
 
   engine.add_object(obj);
