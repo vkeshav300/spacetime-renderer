@@ -73,6 +73,8 @@ matrix_float4x4 APPLE_SIMD_OVERLOAD make_identity_matrix4x4() {
 }
 } // namespace apple_math
 
+namespace physics {
+
 namespace blackbodies {
 Unit get_peak_wavelength(const Unit &temperature) {
   return Unit(1e9f * wiens_constant / temperature.get_value());
@@ -83,7 +85,6 @@ Color get_rgba_from_wavelength(const Unit &lambda) {
    * wavelength, not a blackbody curve with the wavelength being the peak of the
    * curve */
   Color color;
-  float factor, lambda_f = lambda.get_value();
 
   /* Calculate rgb */
   if (lambda >= 380.0_nm && lambda < 440.0_nm) {
@@ -116,6 +117,9 @@ Color get_rgba_from_wavelength(const Unit &lambda) {
     color.g = 0.0f;
   }
 
+  float factor;
+  const float lambda_f = lambda.get_value();
+
   /* Account for intensity falloff near vision limits */
   if (lambda >= 380.0_nm && lambda < 420.0_nm)
     factor = 0.3f + 0.7f * (lambda_f - 380.0f) / 40.0f;
@@ -145,3 +149,5 @@ Color get_rgba_from_wavelength(const Unit &lambda) {
   return color;
 }
 } // namespace blackbodies
+
+} // namespace physics
