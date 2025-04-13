@@ -18,7 +18,7 @@ int main() {
       M_PI / 2, 1.0f, 100.0f);
   Engine engine(camera, 800, 600, 4);
 
-  Object *obj = new Object(shapes::square);
+  Object *obj = new Object(shapes::cube);
   obj->rotate(0, 0, 1, M_PI / 8);
 
   const Unit temperature(5780.0_K),
